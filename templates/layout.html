@@ -30,12 +30,27 @@
         .flash-message {
             margin-top: 20px;
         }
+        .navbar {
+            background-color: #FFA500 !important; /* Amarillo-naranja */
+        }
+        .navbar-brand img {
+            max-height: 40px; /* Ajusta el tamaño del logo */
+            margin-right: 10px; /* Espacio entre el logo y el texto */
+        }
+        .navbar .nav-link {
+            color: black !important; /* Texto negro */
+            font-weight: bold; /* Texto en negrita */
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand logo" href="/">Sistema de Asistencia EMI</a>
+            <a class="navbar-brand" href="/">
+                <img src="/static/images/emi_logo.png" alt="Logo EMI">
+                <a class="navbar-brand" href="/">
+                    <span style="color: black; font-weight: bold;">Sistema de Asistencia EMI</span>
+                </a>            </a>
             {% if session.user_id %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
