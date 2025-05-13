@@ -1,10 +1,15 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
+        <div class="text-center mb-4">
+            <div style="background: white; padding: 15px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <img src="/static/images/emi_logo.png" alt="Logo de la Institución" style="max-width: 150px;">
+            </div>
+        </div>
+        <div class="card" style="background: rgba(255, 255, 255, 0.9); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div class="card-header bg-primary text-white text-center">
                 <h4 class="mb-0">Inicio de Sesión</h4>
             </div>
             <div class="card-body">
@@ -17,7 +22,7 @@
                         <label for="password" class="form-label">Contraseña</label>
                         <input type="password" class="form-control" id="password" name="password" required>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+                    <button type="submit" class="btn" style="background-color: #FFC107; color: white; font-weight: bold; width: 100%;">Continuar</button>
                 </form>
             </div>
         </div>

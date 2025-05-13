@@ -9,8 +9,12 @@
     <!-- Iconos de Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body {
-            background-color: #f8f9fa;
+        html, body {
+            height: 100%; /* Asegura que el fondo cubra toda la pantalla */
+            margin: 0; /* Elimina márgenes */
+            padding: 0; /* Elimina paddings */
+            background: url('/static/images/fondo.jpg') no-repeat center center fixed; /* Aplica el fondo */
+            background-size: cover; /* Asegura que el fondo cubra toda la pantalla */
         }
         .container {
             max-width: 1000px;
@@ -31,7 +35,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container">
-            <a class="navbar-brand logo" href="/">Sistema de Asistencia</a>
+            <a class="navbar-brand logo" href="/">Sistema de Asistencia EMI</a>
             {% if session.user_id %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
