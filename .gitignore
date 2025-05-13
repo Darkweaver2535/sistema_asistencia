@@ -1,0 +1,47 @@
+# Entorno virtual
+venev/
+
+# Variables de entorno
+.env
+
+# Cachés y compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribución y builds
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+wheels/
+share/python-wheels/
+
+# Django
+*.log
+*.pot
+*.pyc
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# IDEs y editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Otros
+coverage.xml
+htmlcov/
+nosetests.xml
+pip-log.txt
+pip-delete-this-directory.txt

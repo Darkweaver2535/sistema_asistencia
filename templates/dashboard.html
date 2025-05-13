@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">¡Bienvenido, {{ user.full_name }}!</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h3>{{ current_date.strftime('%d-%m-%Y') }}</h3>
+                    <h2 id="current-time" class="display-4">00:00:00</h2>
+                </div>
+
+                <div class="row">
+                    {% if pending_checkout %}
+                        <div class="col-md-12">
+                            <div class="card bg-warning mb-3">
+                                <div class="card-body">
+                                    <h5><i class="bi bi-exclamation-triangle"></i> Tienes una entrada pendiente de marcar salida</h5>
+                                </div>
+                            </div>
+                            <form method="post" action="/check_out" class="mb-4">
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Descripción de actividades</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100 btn-lg">
+                                    <i class="bi bi-box-arrow-left"></i> Registrar Salida
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="col-md-12">
+                            <form method="post" action="/check_in">
+                                <button type="submit" class="btn btn-success w-100 btn-lg">
+                                    <i class="bi bi-box-arrow-in-right"></i> Registrar Entrada
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    // Actualizar la hora cada segundo
+    setInterval(updateTime, 1000);
+    
+    // Actualizar la hora al cargar la página
+    updateTime();
+</script>
+{% endblock %}
