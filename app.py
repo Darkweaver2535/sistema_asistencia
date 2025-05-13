@@ -1,3 +1,4 @@
+import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import os
 import datetime
@@ -100,6 +101,53 @@ def add_user():
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'message': 'El nombre de usuario ya existe'})
+
+@app.route('/admin/update_user/<int:user_id>', methods=['GET', 'POST'])
+def update_user(user_id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('index'))
+    
+    if request.method == 'GET':
+        # Obtener información del usuario
+        conn = sqlite3.connect('attendance.db')
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute("SELECT id, username, full_name, is_admin FROM users WHERE id = ?", (user_id,))
+        user = c.fetchone()
+        conn.close()
+        
+        if not user:
+            flash('Usuario no encontrado', 'error')
+            return redirect(url_for('admin'))
+        
+        return render_template('update_user.html', user=user)
+    
+    elif request.method == 'POST':
+        # Actualizar usuario
+        username = request.form.get('username')
+        password = request.form.get('password')  # Puede ser vacío si no cambia
+        full_name = request.form.get('full_name')
+        is_admin = 1 if request.form.get('is_admin') else 0
+        
+        if not (username and full_name):
+            return jsonify({'success': False, 'message': 'Usuario y nombre son obligatorios'})
+        
+        success, message = database.update_user(user_id, username, password, full_name, is_admin)
+        
+        return jsonify({'success': success, 'message': message})
+
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'success': False, 'message': 'Acceso no autorizado'})
+    
+    # No permitir eliminar el propio usuario administrador
+    if user_id == session['user_id']:
+        return jsonify({'success': False, 'message': 'No puedes eliminar tu propio usuario'})
+    
+    success, message = database.delete_user(user_id)
+    return jsonify({'success': success, 'message': message})
 
 @app.route('/admin/reports')
 def reports():

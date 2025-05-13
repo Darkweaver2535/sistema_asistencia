@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Editar Usuario</h4>
+            </div>
+            <div class="card-body">
+                <form id="updateUserForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nombre de Usuario</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Dejar en blanco para no cambiar">
+                        <small class="text-muted">Dejar en blanco para mantener la contraseña actual</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" {% if user.is_admin %}checked{% endif %}>
+                        <label class="form-check-label" for="is_admin">Es administrador</label>
+                    </div>
+                    
+                    <div id="updateMessage" class="alert d-none"></div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="/admin" class="btn btn-secondary">Cancelar</a>
+                        <button type="button" id="updateUserBtn" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('updateUserBtn').addEventListener('click', function() {
+        const form = document.getElementById('updateUserForm');
+        const messageDiv = document.getElementById('updateMessage');
+        const formData = new FormData(form);
+        
+        // Limpiar mensajes anteriores
+        messageDiv.className = 'alert d-none';
+        
+        fetch('/admin/update_user/{{ user.id }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = data.message || 'Usuario actualizado correctamente';
+                
+                // Redireccionar después de 1 segundo
+                setTimeout(() => {
+                    window.location.href = '/admin';
+                }, 1000);
+            } else {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = data.message || 'Error al actualizar usuario';
+            }
+        })
+        .catch(error => {
+            messageDiv.className = 'alert alert-danger';
+            messageDiv.textContent = 'Error en la comunicación con el servidor';
+            console.error('Error:', error);
+        });
+    });
+</script>
+{% endblock %}

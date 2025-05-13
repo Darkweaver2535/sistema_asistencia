@@ -18,6 +18,7 @@
                                 <th>ID</th>
                                 <th>Usuario</th>
                                 <th>Nombre Completo</th>
+                                <th>Rol</th> <!-- Nueva columna para mostrar el rol -->
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -27,15 +28,22 @@
                                 <td>{{ user.id }}</td>
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.full_name }}</td>
+                                <td>{{ 'Administrador' if user.is_admin else 'Usuario' }}</td> <!-- Mostrar si es administrador o usuario -->
                                 <td>
                                     <a href="/admin/reports?user_id={{ user.id }}" class="btn btn-sm btn-info">
                                         <i class="bi bi-file-text"></i> Ver Registros
                                     </a>
+                                    <a href="/admin/update_user/{{ user.id }}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <button class="btn btn-sm btn-danger delete-user" data-id="{{ user.id }}" data-name="{{ user.full_name }}">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="4" class="text-center">No hay usuarios registrados</td>
+                                <td colspan="5" class="text-center">No hay usuarios registrados</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -82,6 +90,26 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para confirmar eliminación -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar al usuario <strong id="deleteUserName"></strong>?</p>
+                <p>Esta acción no se puede deshacer y eliminará todos los registros de asistencia asociados.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -116,6 +144,53 @@
             messageDiv.className = 'alert alert-danger';
             messageDiv.textContent = 'Error en la comunicación con el servidor';
             console.error('Error:', error);
+        });
+    });
+    
+    // Eliminar usuario
+    let userIdToDelete = null;
+    
+    // Configurar el modal de eliminación cuando se hace clic en el botón eliminar
+    document.querySelectorAll('.delete-user').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            const userName = this.getAttribute('data-name');
+            userIdToDelete = userId;
+            
+            document.getElementById('deleteUserName').textContent = userName;
+            
+            // Mostrar el modal de confirmación
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+            deleteModal.show();
+        });
+    });
+    
+    // Manejar la confirmación de eliminación
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (!userIdToDelete) return;
+        
+        fetch(`/admin/delete_user/${userIdToDelete}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Cerrar el modal
+            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteUserModal'));
+            deleteModal.hide();
+            
+            if (data.success) {
+                // Mostrar mensaje de éxito
+                alert(data.message || 'Usuario eliminado correctamente');
+                // Recargar la página
+                window.location.reload();
+            } else {
+                // Mostrar mensaje de error
+                alert(data.message || 'Error al eliminar el usuario');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error en la comunicación con el servidor');
         });
     });
 </script>

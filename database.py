@@ -64,6 +64,72 @@ def add_user(username, password, full_name, is_admin=0):
     conn.close()
     return success
 
+def update_user(user_id, username=None, password=None, full_name=None, is_admin=None):
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    
+    # Obtener datos actuales del usuario
+    c.execute("SELECT username, full_name, is_admin FROM users WHERE id = ?", (user_id,))
+    current_user = c.fetchone()
+    
+    if not current_user:
+        conn.close()
+        return False, "Usuario no encontrado"
+    
+    # Usar valores actuales si no se proporcionan nuevos
+    username = username if username is not None else current_user[0]
+    full_name = full_name if full_name is not None else current_user[1]
+    is_admin = is_admin if is_admin is not None else current_user[2]
+    
+    try:
+        if password:
+            # Si se proporcionó una nueva contraseña, actualizar todo incluyendo la contraseña
+            c.execute("""
+                UPDATE users 
+                SET username = ?, password = ?, full_name = ?, is_admin = ? 
+                WHERE id = ?
+            """, (username, generate_password_hash(password), full_name, is_admin, user_id))
+        else:
+            # Si no hay nueva contraseña, actualizar todo excepto la contraseña
+            c.execute("""
+                UPDATE users 
+                SET username = ?, full_name = ?, is_admin = ? 
+                WHERE id = ?
+            """, (username, full_name, is_admin, user_id))
+        
+        conn.commit()
+        conn.close()
+        return True, "Usuario actualizado correctamente"
+    except sqlite3.IntegrityError:
+        conn.close()
+        return False, "El nombre de usuario ya existe"
+
+def delete_user(user_id):
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    
+    # Verificar si el usuario existe
+    c.execute("SELECT id FROM users WHERE id = ?", (user_id,))
+    if not c.fetchone():
+        conn.close()
+        return False, "Usuario no encontrado"
+    
+    # Verificar si el usuario tiene registros de asistencia
+    c.execute("SELECT id FROM attendance WHERE user_id = ? LIMIT 1", (user_id,))
+    if c.fetchone():
+        # Opción 1: Impedir borrar usuarios con registros
+        # conn.close()
+        # return False, "No se puede eliminar el usuario porque tiene registros de asistencia"
+        
+        # Opción 2: Eliminar también los registros de asistencia (cascada)
+        c.execute("DELETE FROM attendance WHERE user_id = ?", (user_id,))
+    
+    # Eliminar el usuario
+    c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return True, "Usuario eliminado correctamente"
+
 def check_in(user_id):
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
@@ -110,7 +176,8 @@ def get_users():
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     
-    c.execute("SELECT id, username, full_name FROM users WHERE is_admin = 0")
+    # Eliminar el filtro de is_admin para incluir todos los usuarios '...WHERE is_admin = 0'
+    c.execute("SELECT id, username, full_name, is_admin FROM users")
     users = c.fetchall()
     
     conn.close()
