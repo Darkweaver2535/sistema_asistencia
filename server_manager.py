@@ -99,96 +99,93 @@ class FlaskServerManager:
     def create_widgets(self):
         # Logo en recuadro blanco
         logo_frame = tk.Frame(self.main_frame, bg=BLANCO, bd=2, relief=tk.RIDGE)
-        logo_frame.pack(pady=(0, 10))  # Solo ancho necesario, no expandir horizontalmente
+        logo_frame.pack(pady=(0, 10))
         
         try:
             logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "images", "emi_logo.png")
             if os.path.exists(logo_path):
                 logo_image = Image.open(logo_path)
-                logo_image = logo_image.resize((80, 80))  # Ajustar tamaño
+                logo_image = logo_image.resize((80, 80))
                 self.logo_photo = ImageTk.PhotoImage(logo_image)
                 logo_label = tk.Label(logo_frame, image=self.logo_photo, bg=BLANCO)
                 logo_label.pack(side=tk.LEFT, padx=10, pady=10)
                 
                 # Título al lado del logo
                 title_label = tk.Label(logo_frame, text="Gestor de Servidor Flask", 
-                                   font=("Arial", 18, "bold"), 
-                                   fg=AZUL_OSCURO, bg=BLANCO)
+                                       font=("Arial", 18, "bold"), 
+                                       fg=AZUL_OSCURO, bg=BLANCO)
                 title_label.pack(side=tk.LEFT, padx=10)
         except Exception as e:
             print(f"Error al cargar el logo: {e}")
-            # Si hay error, mostrar solo texto
             title_label = tk.Label(logo_frame, text="Gestor de Servidor Flask - EMI", 
-                               font=("Arial", 18, "bold"), 
-                               fg=AZUL_OSCURO, bg=BLANCO)
+                                   font=("Arial", 18, "bold"), 
+                                   fg=AZUL_OSCURO, bg=BLANCO)
             title_label.pack(side=tk.LEFT, padx=10, pady=10)
         
         # Información del entorno virtual
-        venv_frame = tk.Frame(self.main_frame, bg='')  # Sin color de fondo
+        venv_frame = tk.Frame(self.main_frame, bg=BLANCO)
         venv_frame.pack(fill=tk.X, pady=(0, 10))
         
-        tk.Label(venv_frame, text="Entorno Virtual:", bg='white', fg=BLANCO, font=("Arial", 10, "bold")).pack(side=tk.LEFT)
-        self.venv_status = tk.Label(venv_frame, text="No detectado", fg=AMARILLO, bg='white')
+        tk.Label(venv_frame, text="Entorno Virtual:", bg=BLANCO, fg=AZUL_OSCURO, font=("Arial", 10, "bold")).pack(side=tk.LEFT)
+        self.venv_status = tk.Label(venv_frame, text="No detectado", fg=AZUL_OSCURO, bg=BLANCO, font=("Arial", 10, "bold"))
         if self.venv_path:
-            self.venv_status.config(text=f"Detectado en {self.venv_path}", fg=AMARILLO)
+            self.venv_status.config(text=f"Detectado en {self.venv_path}", fg=AZUL_OSCURO)
         self.venv_status.pack(side=tk.LEFT, padx=(5, 0))
         
         # Botones de control
-        btn_frame = tk.Frame(self.main_frame, bg='')  # Sin color de fondo
+        btn_frame = tk.Frame(self.main_frame, bg=BLANCO)
         btn_frame.pack(fill=tk.X, pady=10)
-        
+
         self.start_btn = tk.Button(btn_frame, text="Iniciar Servidor", 
-                                 command=self.start_server, 
-                                 bg=AZUL_MEDIO, fg=BLANCO, 
-                                 padx=20, pady=10,
-                                 font=("Arial", 12, "bold"),
-                                 activebackground=AZUL_OSCURO,
-                                 activeforeground=BLANCO)
+                                   command=self.start_server, 
+                                   bg=AMARILLO, fg=AZUL_OSCURO,  # Fondo amarillo, texto negro
+                                   padx=20, pady=10,
+                                   font=("Arial", 12, "bold"),
+                                   activebackground="#E6C200",  # Amarillo más oscuro al presionar
+                                   activeforeground=AZUL_OSCURO)
         self.start_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
+
         self.stop_btn = tk.Button(btn_frame, text="Detener Servidor", 
-                                command=self.stop_server, 
-                                bg=AMARILLO, fg=AZUL_OSCURO, 
-                                padx=20, pady=10,
-                                font=("Arial", 12, "bold"),
-                                activebackground="#E6C200",  # Amarillo más oscuro para hover
-                                activeforeground=AZUL_OSCURO,
-                                state=tk.DISABLED)
+                                  command=self.stop_server, 
+                                  bg=AMARILLO, fg=AZUL_OSCURO,  # Fondo amarillo, texto negro
+                                  padx=20, pady=10,
+                                  font=("Arial", 12, "bold"),
+                                  activebackground="#E6C200",  # Amarillo más oscuro al presionar
+                                  activeforeground=AZUL_OSCURO,
+                                  state=tk.DISABLED)
         self.stop_btn.pack(side=tk.LEFT)
-        
+
         self.open_browser_btn = tk.Button(btn_frame, text="Abrir en Navegador", 
-                                       command=self.open_in_browser, 
-                                       bg=AZUL_MEDIO, fg=BLANCO, 
-                                       padx=20, pady=10,
-                                       font=("Arial", 12, "bold"),
-                                       activebackground=AZUL_OSCURO,
-                                       activeforeground=BLANCO,
-                                       state=tk.DISABLED)
+                                          command=self.open_in_browser, 
+                                          bg=AMARILLO, fg=AZUL_OSCURO,  # Fondo amarillo, texto negro
+                                          padx=20, pady=10,
+                                          font=("Arial", 12, "bold"),
+                                          activebackground="#E6C200",  # Amarillo más oscuro al presionar
+                                          activeforeground=AZUL_OSCURO,
+                                          state=tk.DISABLED)
         self.open_browser_btn.pack(side=tk.RIGHT)
         
         # Estado del servidor
-        status_frame = tk.Frame(self.main_frame, bg='')  # Sin color de fondo
+        status_frame = tk.Frame(self.main_frame, bg=BLANCO)
         status_frame.pack(fill=tk.X, pady=(0, 10))
         
-        tk.Label(status_frame, text="Estado:", bg='white', fg=BLANCO, font=("Arial", 10, "bold")).pack(side=tk.LEFT)
-        self.status_label = tk.Label(status_frame, text="Detenido", fg=AMARILLO, bg='white')  # O cualquier color válido
-
+        tk.Label(status_frame, text="Estado:", bg=BLANCO, fg=AZUL_OSCURO, font=("Arial", 10, "bold")).pack(side=tk.LEFT)
+        self.status_label = tk.Label(status_frame, text="Detenido", fg=AZUL_OSCURO, bg=BLANCO, font=("Arial", 10, "bold"))
         self.status_label.pack(side=tk.LEFT, padx=(5, 0))
         
-        tk.Label(status_frame, text="URL:", bg='white', fg=BLANCO, font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=(20, 0))
-
-        self.url_label = tk.Label(status_frame, text="N/A", bg='white', fg=AMARILLO)
+        tk.Label(status_frame, text="URL:", bg=BLANCO, fg=AZUL_OSCURO, font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=(20, 0))
+        self.url_label = tk.Label(status_frame, text="N/A", bg=BLANCO, fg=AZUL_OSCURO, font=("Arial", 10, "bold"))
         self.url_label.pack(side=tk.LEFT, padx=(5, 0))
         
-        # Área de logs - fondo semi-transparente
+        # Área de logs
         log_frame = tk.LabelFrame(self.main_frame, text="Logs del Servidor", 
-                               padx=5, pady=5, bg='', fg=BLANCO,
-                               font=("Arial", 10, "bold"))
+                                   padx=5, pady=5, bg=BLANCO, fg=AZUL_OSCURO,
+                                   font=("Arial", 10, "bold"))
         log_frame.pack(fill=tk.BOTH, expand=True)
         
         self.log_area = scrolledtext.ScrolledText(log_frame, wrap=tk.WORD, 
-                                             bg=AZUL_OSCURO, fg=AMARILLO,
-                                             font=("Consolas", 9))
+                                                  bg=AZUL_OSCURO, fg=AMARILLO,
+                                                  font=("Consolas", 9))
         self.log_area.pack(fill=tk.BOTH, expand=True)
     
     def get_local_ip(self):
