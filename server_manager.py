@@ -1,3 +1,4 @@
+#tener descargado python, wsl --install y git bash
 import tkinter as tk
 from tkinter import messagebox, scrolledtext
 import subprocess
