@@ -1,4 +1,3 @@
-#tener descargado python, wsl --install y git bash
 import tkinter as tk
 from tkinter import messagebox, scrolledtext
 import subprocess
@@ -9,12 +8,21 @@ import threading
 import webbrowser
 import signal
 import platform
+from PIL import Image, ImageTk
+
+# Definición de colores (esquema de azul, amarillo y blanco)
+AZUL_OSCURO = "#003366"  # Azul institucional oscuro
+AZUL_MEDIO = "#0055A4"   # Azul medio para botones
+AMARILLO = "#FFD700"     # Amarillo dorado
+BLANCO = "#FFFFFF"       # Blanco
+GRIS_CLARO = "#F0F0F0"   # Gris muy claro (casi blanco) para áreas de texto
+
 
 class FlaskServerManager:
     def __init__(self, root):
         self.root = root
-        self.root.title("Gestor de Servidor Flask")
-        self.root.geometry("600x400")
+        self.root.title("Gestor de Servidor Flask - EMI")
+        self.root.geometry("700x500")
         self.root.resizable(True, True)
         
         # Variables
@@ -24,11 +32,45 @@ class FlaskServerManager:
         self.venv_path = self.detect_venv_path()
         self.flask_app_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.py")
         
+        # Establecer tema de la aplicación
+        self.set_theme()
+
         # Crear elementos de la interfaz
         self.create_widgets()
         
         # Configurar cierre adecuado
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+    
+    def set_theme(self):
+        """Configura el tema visual de la aplicación"""
+        # Configurar el fondo
+        try:
+            # Cargar imagen de fondo y ajustarla al tamaño
+            bg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "images", "fondo.jpg")
+            if os.path.exists(bg_path):
+                bg_image = Image.open(bg_path)
+                bg_image = bg_image.resize((700, 500))  # Ajustar al tamaño inicial de la ventana
+                self.bg_photo = ImageTk.PhotoImage(bg_image)
+                
+                # Crear un canvas como fondo
+                self.bg_canvas = tk.Canvas(self.root, width=700, height=500)
+                self.bg_canvas.pack(fill=tk.BOTH, expand=True)
+                self.bg_canvas.create_image(0, 0, image=self.bg_photo, anchor=tk.NW)
+                
+                # Frame principal transparente sobre el canvas
+                self.main_frame = tk.Frame(self.bg_canvas, bg='', padx=10, pady=10)  # Sin color de fondo
+                self.main_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER, relwidth=0.95, relheight=0.95)
+            else:
+                # Si no existe la imagen, usar un color de fondo
+                self.root.configure(bg=AZUL_OSCURO)
+                self.main_frame = tk.Frame(self.root, bg=AZUL_OSCURO, padx=10, pady=10)
+                self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        except Exception as e:
+            print(f"Error al cargar el fondo: {e}")
+            # En caso de error, usar un color de fondo
+            self.root.configure(bg=AZUL_OSCURO)
+            self.main_frame = tk.Frame(self.root, bg=AZUL_OSCURO, padx=10, pady=10)
+            self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
     
     def detect_venv_path(self):
         """Detecta la ruta del entorno virtual"""
@@ -55,64 +97,98 @@ class FlaskServerManager:
         return None
     
     def create_widgets(self):
-        # Frame principal
-        main_frame = tk.Frame(self.root, padx=10, pady=10)
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        # Logo en recuadro blanco
+        logo_frame = tk.Frame(self.main_frame, bg=BLANCO, bd=2, relief=tk.RIDGE)
+        logo_frame.pack(pady=(0, 10))  # Solo ancho necesario, no expandir horizontalmente
+        
+        try:
+            logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "images", "emi_logo.png")
+            if os.path.exists(logo_path):
+                logo_image = Image.open(logo_path)
+                logo_image = logo_image.resize((80, 80))  # Ajustar tamaño
+                self.logo_photo = ImageTk.PhotoImage(logo_image)
+                logo_label = tk.Label(logo_frame, image=self.logo_photo, bg=BLANCO)
+                logo_label.pack(side=tk.LEFT, padx=10, pady=10)
+                
+                # Título al lado del logo
+                title_label = tk.Label(logo_frame, text="Gestor de Servidor Flask", 
+                                   font=("Arial", 18, "bold"), 
+                                   fg=AZUL_OSCURO, bg=BLANCO)
+                title_label.pack(side=tk.LEFT, padx=10)
+        except Exception as e:
+            print(f"Error al cargar el logo: {e}")
+            # Si hay error, mostrar solo texto
+            title_label = tk.Label(logo_frame, text="Gestor de Servidor Flask - EMI", 
+                               font=("Arial", 18, "bold"), 
+                               fg=AZUL_OSCURO, bg=BLANCO)
+            title_label.pack(side=tk.LEFT, padx=10, pady=10)
         
         # Información del entorno virtual
-        venv_frame = tk.Frame(main_frame)
+        venv_frame = tk.Frame(self.main_frame, bg='')  # Sin color de fondo
         venv_frame.pack(fill=tk.X, pady=(0, 10))
         
-        tk.Label(venv_frame, text="Entorno Virtual:").pack(side=tk.LEFT)
-        self.venv_status = tk.Label(venv_frame, text="No detectado", fg="red")
+        tk.Label(venv_frame, text="Entorno Virtual:", bg='white', fg=BLANCO, font=("Arial", 10, "bold")).pack(side=tk.LEFT)
+        self.venv_status = tk.Label(venv_frame, text="No detectado", fg=AMARILLO, bg='white')
         if self.venv_path:
-            self.venv_status.config(text=f"Detectado en {self.venv_path}", fg="green")
+            self.venv_status.config(text=f"Detectado en {self.venv_path}", fg=AMARILLO)
         self.venv_status.pack(side=tk.LEFT, padx=(5, 0))
         
         # Botones de control
-        btn_frame = tk.Frame(main_frame)
+        btn_frame = tk.Frame(self.main_frame, bg='')  # Sin color de fondo
         btn_frame.pack(fill=tk.X, pady=10)
         
         self.start_btn = tk.Button(btn_frame, text="Iniciar Servidor", 
                                  command=self.start_server, 
-                                 bg="#4CAF50", fg="white", 
+                                 bg=AZUL_MEDIO, fg=BLANCO, 
                                  padx=20, pady=10,
-                                 font=("Arial", 12, "bold"))
+                                 font=("Arial", 12, "bold"),
+                                 activebackground=AZUL_OSCURO,
+                                 activeforeground=BLANCO)
         self.start_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         self.stop_btn = tk.Button(btn_frame, text="Detener Servidor", 
                                 command=self.stop_server, 
-                                bg="#F44336", fg="white", 
+                                bg=AMARILLO, fg=AZUL_OSCURO, 
                                 padx=20, pady=10,
                                 font=("Arial", 12, "bold"),
+                                activebackground="#E6C200",  # Amarillo más oscuro para hover
+                                activeforeground=AZUL_OSCURO,
                                 state=tk.DISABLED)
         self.stop_btn.pack(side=tk.LEFT)
         
         self.open_browser_btn = tk.Button(btn_frame, text="Abrir en Navegador", 
                                        command=self.open_in_browser, 
-                                       bg="#2196F3", fg="white", 
+                                       bg=AZUL_MEDIO, fg=BLANCO, 
                                        padx=20, pady=10,
                                        font=("Arial", 12, "bold"),
+                                       activebackground=AZUL_OSCURO,
+                                       activeforeground=BLANCO,
                                        state=tk.DISABLED)
         self.open_browser_btn.pack(side=tk.RIGHT)
         
         # Estado del servidor
-        status_frame = tk.Frame(main_frame)
+        status_frame = tk.Frame(self.main_frame, bg='')  # Sin color de fondo
         status_frame.pack(fill=tk.X, pady=(0, 10))
         
-        tk.Label(status_frame, text="Estado:").pack(side=tk.LEFT)
-        self.status_label = tk.Label(status_frame, text="Detenido", fg="red")
+        tk.Label(status_frame, text="Estado:", bg='white', fg=BLANCO, font=("Arial", 10, "bold")).pack(side=tk.LEFT)
+        self.status_label = tk.Label(status_frame, text="Detenido", fg=AMARILLO, bg='white')  # O cualquier color válido
+
         self.status_label.pack(side=tk.LEFT, padx=(5, 0))
         
-        tk.Label(status_frame, text="URL:").pack(side=tk.LEFT, padx=(20, 0))
-        self.url_label = tk.Label(status_frame, text="N/A")
+        tk.Label(status_frame, text="URL:", bg='white', fg=BLANCO, font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=(20, 0))
+
+        self.url_label = tk.Label(status_frame, text="N/A", bg='white', fg=AMARILLO)
         self.url_label.pack(side=tk.LEFT, padx=(5, 0))
         
-        # Área de logs
-        log_frame = tk.LabelFrame(main_frame, text="Logs del Servidor", padx=5, pady=5)
+        # Área de logs - fondo semi-transparente
+        log_frame = tk.LabelFrame(self.main_frame, text="Logs del Servidor", 
+                               padx=5, pady=5, bg='', fg=BLANCO,
+                               font=("Arial", 10, "bold"))
         log_frame.pack(fill=tk.BOTH, expand=True)
         
-        self.log_area = scrolledtext.ScrolledText(log_frame, wrap=tk.WORD, bg="#f5f5f5")
+        self.log_area = scrolledtext.ScrolledText(log_frame, wrap=tk.WORD, 
+                                             bg=AZUL_OSCURO, fg=AMARILLO,
+                                             font=("Consolas", 9))
         self.log_area.pack(fill=tk.BOTH, expand=True)
     
     def get_local_ip(self):
@@ -238,7 +314,7 @@ class FlaskServerManager:
         self.start_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.DISABLED)
         self.open_browser_btn.config(state=tk.DISABLED)
-        self.status_label.config(text="Detenido", fg="red")
+        self.status_label.config(text="Detenido", fg=AMARILLO)
         self.url_label.config(text="N/A")
         
         # Informar al usuario
@@ -276,7 +352,7 @@ class FlaskServerManager:
         self.start_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.DISABLED)
         self.open_browser_btn.config(state=tk.DISABLED)
-        self.status_label.config(text="Detenido", fg="red")
+        self.status_label.config(text="Detenido", fg=AMARILLO)
         self.url_label.config(text="N/A")
     
     def open_in_browser(self):
