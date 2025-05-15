@@ -40,6 +40,7 @@ def login():
         if user and database.check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['username']
+            session['full_name'] = user['full_name']
             session['is_admin'] = user['is_admin']
             flash('¡Inicio de sesión exitoso!', 'success')
             return redirect(url_for('index'))
