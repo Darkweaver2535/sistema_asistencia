@@ -1,0 +1,193 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Registro de Actividades en Laboratorio de Metal Mecánica</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('actividades_form') }}" method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha" class="form-label">1. Fecha:</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" required value="{{ current_date.strftime('%Y-%m-%d') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">2. Nombre del responsable:</label>
+                            <input type="text" class="form-control" value="{{ session.get('username') }}" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">3. Área asignada:</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="area" value="Maquinado y mecanizado" id="area1">
+                                    <label class="form-check-label" for="area1">Maquinado y mecanizado</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="area" value="Prototipado" id="area2">
+                                    <label class="form-check-label" for="area2">Prototipado</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="area" value="Fundición" id="area3">
+                                    <label class="form-check-label" for="area3">Fundición</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="area" value="Corte y doblado de planchas metálicas" id="area4">
+                                    <label class="form-check-label" for="area4">Corte y doblado de planchas metálicas</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="area" value="Sujeción y ensamblado" id="area5">
+                                    <label class="form-check-label" for="area5">Sujeción y ensamblado</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="area" value="Transporte y manejo de material" id="area6">
+                                    <label class="form-check-label" for="area6">Transporte y manejo de material</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="area" value="Documentación técnica / Soporte digital" id="area7">
+                                    <label class="form-check-label" for="area7">Documentación técnica / Soporte digital</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="proyecto" class="form-label">4. Proyecto asociado (si aplica):</label>
+                        <input type="text" class="form-control" id="proyecto" name="proyecto">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">5. Tipo de trabajo:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Apoyo general de laboratorio" id="tipo1" required>
+                            <label class="form-check-label" for="tipo1">Apoyo general de laboratorio</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Trabajo de grado" id="tipo2">
+                            <label class="form-check-label" for="tipo2">Trabajo de grado</label>
+                        </div>
+                         <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Proyecto de investigación" id="tipo3">
+                            <label class="form-check-label" for="tipo3">Proyecto de investigación</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Desarrollo institucional" id="tipo4">
+                            <label class="form-check-label" for="tipo4">Desarrollo institucional</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Otro" id="tipo5">
+                            <label class="form-check-label" for="tipo5">Otro:</label>
+                            <input type="text" class="form-control mt-2" id="otro_tipo" name="otro_tipo" placeholder="Especifique otro tipo de trabajo">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="actividades" class="form-label">6. Actividades realizadas (descripción breve y clara):</label>
+                        <textarea class="form-control" id="actividades" name="actividades" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">7. Equipos utilizados:</label>
+                        <div class="row">
+                            {% for equipo in equipos %}
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="equipos" value="{{ equipo }}" id="equipo{{ loop.index }}">
+                                    <label class="form-check-label" for="equipo{{ loop.index }}">{{ equipo }}</label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-2">
+                            <label for="otros_equipos" class="form-label">Otros equipos:</label>
+                            <input type="text" class="form-control" id="otros_equipos" name="otros_equipos" placeholder="Especifique otros equipos utilizados">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tiempo_uso" class="form-label">8. Tiempo estimado de uso del equipo (horas/minutos):</label>
+                        <input type="text" class="form-control" id="tiempo_uso" name="tiempo_uso" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">9. ¿Hubo incidentes o fallas?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="incidentes" id="incidentesSi" value="Si">
+                            <label class="form-check-label" for="incidentesSi">Sí</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="incidentes" id="incidentesNo" value="No" checked>
+                            <label class="form-check-label" for="incidentesNo">No</label>
+                        </div>
+                        <div class="mt-2" id="detallesIncidentesContainer" style="display: none;">
+                            <label for="detalles_incidentes" class="form-label">En caso afirmativo, detallar:</label>
+                            <textarea class="form-control" id="detalles_incidentes" name="detalles_incidentes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">10. Observaciones y recomendaciones:</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="foto" class="form-label">11. Fotografía del trabajo o actividad (opcional):</label>
+                        <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
+                    </div>
+                    
+                    <hr>
+                    <div class="mb-3">
+                        <h5>Normativa del uso del formulario:</h5>
+                        <ul>
+                            <li>El registro es individual y debe llenarse de manera simultánea al trabajo o al finalizar la jornada.</li>
+                            <li>Toda la información debe ser precisa, clara y verificable.</li>
+                            <li>El uso indebido de este formulario o la omisión de información importante será comunicado a la coordinación del laboratorio.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-save"></i> Guardar Registro
+                        </button>
+                        <a href="{{ url_for('laboratorio') }}" class="btn btn-secondary btn-lg ms-2">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mostrar/ocultar detalles de incidentes
+        const incidentesSi = document.getElementById('incidentesSi');
+        const incidentesNo = document.getElementById('incidentesNo');
+        const detallesContainer = document.getElementById('detallesIncidentesContainer');
+        
+        incidentesSi.addEventListener('change', function() {
+            if (this.checked) {
+                detallesContainer.style.display = 'block';
+            }
+        });
+        
+        incidentesNo.addEventListener('change', function() {
+            if (this.checked) {
+                detallesContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

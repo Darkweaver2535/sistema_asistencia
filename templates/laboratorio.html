@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-tools"></i> Laboratorio de Metal Mecánica</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Registro de Actividades</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Utilice este formulario para registrar las actividades realizadas en el laboratorio de Metal Mecánica.</p>
+                                <ul>
+                                    <li>El registro es individual y debe completarse al finalizar la actividad.</li>
+                                    <li>Toda la información debe ser precisa, clara y verificable.</li>
+                                    <li>El uso indebido de este formulario será comunicado a la coordinación.</li>
+                                </ul>
+                                <a href="{{ url_for('actividades_form') }}" class="btn btn-success w-100">
+                                    <i class="bi bi-plus-circle"></i> Nuevo Registro de Actividad
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="bi bi-folder-check"></i> Registro de Proyectos</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Utilice este formulario para registrar proyectos de investigación en el laboratorio de Metal Mecánica.</p>
+                                <ul>
+                                    <li>Complete el formulario al inicio del proyecto.</li>
+                                    <li>Incluya toda la información relevante sobre materiales y equipos utilizados.</li>
+                                    <li>Adjunte fotografías del avance o producto final del proyecto.</li>
+                                </ul>
+                                <a href="{{ url_for('proyectos_form') }}" class="btn btn-info w-100">
+                                    <i class="bi bi-plus-circle"></i> Nuevo Registro de Proyecto
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="bi bi-list-check"></i> Ver Registros</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Consulte los registros de actividades y proyectos del laboratorio. Podrá generar reportes en PDF de los registros existentes.</p>
+                                <a href="{{ url_for('ver_registros') }}" class="btn btn-secondary">
+                                    <i class="bi bi-search"></i> Ver todos los registros
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

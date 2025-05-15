@@ -1,14 +1,24 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 import os
 import datetime
 import database
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Inicializar base de datos
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 database.init_db()
+
+# Lista de equipos para los formularios
+EQUIPOS_LAB = [
+    "Impresora 3D", "Torno CNC", "Soldadora", "Fresadora", "Sierra de disco",
+    "Taladro de banco", "Rectificadora", "Cizalla", "Prensa hidráulica", "Lijadora", "Multímetro", "Osciloscopio"
+]
 
 @app.route('/')
 def index():
@@ -183,6 +193,129 @@ def reports():
     
     return render_template('reports.html', users=users, records=processed_records, 
                            selected_user=user_id, start_date=start_date, end_date=end_date)
+
+@app.route('/laboratorio')
+def laboratorio():
+    return render_template('laboratorio.html')
+
+# --- Registro de Actividades ---
+@app.route('/laboratorio/actividades', methods=['GET', 'POST'])
+def actividades_form():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    current_date = datetime.datetime.now()
+    if request.method == 'POST':
+        data = {
+            'fecha': request.form.get('fecha'),
+            'responsable_id': session['user_id'],
+            'area': ', '.join(request.form.getlist('area')),
+            'proyecto': request.form.get('proyecto'),
+            'tipo_trabajo': request.form.get('tipo_trabajo'),
+            'otro_tipo': request.form.get('otro_tipo'),
+            'actividades': request.form.get('actividades'),
+            'equipos': ', '.join(request.form.getlist('equipos')),
+            'otros_equipos': request.form.get('otros_equipos'),
+            'tiempo_uso': request.form.get('tiempo_uso'),
+            'incidentes': 1 if request.form.get('incidentes') == 'Si' else 0,
+            'detalles_incidentes': request.form.get('detalles_incidentes'),
+            'observaciones': request.form.get('observaciones'),
+            'foto_path': None
+        }
+        # Guardar foto si existe
+        foto = request.files.get('foto')
+        if foto and foto.filename:
+            filename = secure_filename(f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{foto.filename}")
+            foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            data['foto_path'] = f"{UPLOAD_FOLDER}/{filename}"
+        actividad_id = database.add_actividad(data)
+        flash('Registro de actividad guardado correctamente', 'success')
+        return redirect(url_for('ver_actividad', form_id=actividad_id))
+    return render_template('registro_actividades.html', equipos=EQUIPOS_LAB, current_date=current_date)
+
+@app.route('/laboratorio/actividades/<int:form_id>')
+def ver_actividad(form_id):
+    actividad = database.get_actividad(form_id)
+    if not actividad:
+        flash('Registro no encontrado', 'error')
+        return redirect(url_for('ver_registros'))
+    return render_template('ver_actividad.html', actividad=actividad)
+
+@app.route('/laboratorio/actividades/pdf/<int:form_id>')
+def actividad_pdf(form_id):
+    actividad = database.get_actividad(form_id)
+    if not actividad:
+        return "No encontrado", 404
+    current_date = datetime.datetime.now()
+    return render_template('actividad_pdf.html', actividad=actividad, current_date=current_date)
+
+# --- Registro de Proyectos ---
+@app.route('/laboratorio/proyectos', methods=['GET', 'POST'])
+def proyectos_form():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    current_date = datetime.datetime.now()
+    if request.method == 'POST':
+        data = {
+            'fecha_inicio': request.form.get('fecha_inicio'),
+            'fecha_fin': request.form.get('fecha_fin'),
+            'nombre_proyecto': request.form.get('nombre_proyecto'),
+            'tipo_trabajo': request.form.get('tipo_trabajo'),
+            'otro_tipo': request.form.get('otro_tipo'),
+            'responsable': request.form.get('responsable'),
+            'personal_apoyo1': request.form.get('personal_apoyo1'),
+            'personal_area1': request.form.get('personal_area1'),
+            'personal_apoyo2': request.form.get('personal_apoyo2'),
+            'personal_area2': request.form.get('personal_area2'),
+            'equipos': ', '.join(request.form.getlist('equipos')),
+            'materiales': request.form.get('materiales'),
+            'descripcion': request.form.get('descripcion'),
+            'foto_path': None,
+            'observaciones': request.form.get('observaciones')
+        }
+        foto = request.files.get('foto')
+        if foto and foto.filename:
+            filename = secure_filename(f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{foto.filename}")
+            foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            data['foto_path'] = f"{UPLOAD_FOLDER}/{filename}"
+        proyecto_id = database.add_proyecto(data)
+        flash('Registro de proyecto guardado correctamente', 'success')
+        return redirect(url_for('ver_proyecto', form_id=proyecto_id))
+    return render_template('registro_proyectos.html', equipos=EQUIPOS_LAB, current_date=current_date)
+
+@app.route('/laboratorio/proyectos/<int:form_id>')
+def ver_proyecto(form_id):
+    proyecto = database.get_proyecto(form_id)
+    if not proyecto:
+        flash('Registro no encontrado', 'error')
+        return redirect(url_for('ver_registros'))
+    return render_template('ver_proyecto.html', proyecto=proyecto)
+
+@app.route('/laboratorio/proyectos/pdf/<int:form_id>')
+def proyecto_pdf(form_id):
+    proyecto = database.get_proyecto(form_id)
+    if not proyecto:
+        return "No encontrado", 404
+    current_date = datetime.datetime.now()
+    return render_template('proyecto_pdf.html', proyecto=proyecto, current_date=current_date)
+
+# --- Listado de registros (ambos formularios) ---
+@app.route('/laboratorio/registros')
+def ver_registros():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user_id = request.args.get('user_id', type=int)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    actividades = database.get_actividades(user_id, start_date, end_date)
+    proyectos = database.get_proyectos(start_date, end_date)
+    users = database.get_users()
+    selected_user = user_id if user_id else ''
+    return render_template('ver_registros.html', actividades=actividades, proyectos=proyectos, users=users, selected_user=selected_user, start_date=start_date, end_date=end_date)
+
+# --- Servir archivos subidos (fotos) ---
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)

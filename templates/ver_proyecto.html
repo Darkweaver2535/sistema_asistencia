@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-folder-check"></i> Detalle de Proyecto #{{ proyecto.id }}
+                    <div class="float-end">
+                        <a href="{{ url_for('proyecto_pdf', form_id=proyecto.id) }}" class="btn btn-sm btn-light" target="_blank">
+                            <i class="bi bi-file-pdf"></i> Exportar a PDF
+                        </a>
+                    </div>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>1. Fecha de inicio del apoyo:</h5>
+                        <p>{{ proyecto.fecha_inicio }}</p>
+                        
+                        <h5>2. Fecha de finalización:</h5>
+                        <p>{{ proyecto.fecha_fin }}</p>
+                        
+                        <h5>3. Nombre del proyecto:</h5>
+                        <p>{{ proyecto.nombre_proyecto }}</p>
+                        
+                        <h5>4. Tipo de trabajo:</h5>
+                        <p>{{ proyecto.tipo_trabajo }}</p>
+                        
+                        <h5>5. Responsable del proyecto:</h5>
+                        <p>{{ proyecto.responsable }}</p>
+                        
+                        <h5>6. Estudiantes o personal de apoyo:</h5>
+                        {% if proyecto.personal_apoyo1 %}
+                        <p><strong>Nombre 1:</strong> {{ proyecto.personal_apoyo1 }} ({{ proyecto.personal_area1 }})</p>
+                        {% endif %}
+                        {% if proyecto.personal_apoyo2 %}
+                        <p><strong>Nombre 2:</strong> {{ proyecto.personal_apoyo2 }} ({{ proyecto.personal_area2 }})</p>
+                        {% endif %}
+                        {% if not proyecto.personal_apoyo1 and not proyecto.personal_apoyo2 %}
+                        <p>No se registró personal de apoyo</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>7. Equipos utilizados:</h5>
+                        <p>{{ proyecto.equipos }}</p>
+                        
+                        <h5>8. Materiales consumidos:</h5>
+                        <p>{{ proyecto.materiales }}</p>
+                        
+                        <h5>9. Descripción del apoyo o trabajo:</h5>
+                        <p>{{ proyecto.descripcion }}</p>
+                        
+                        {% if proyecto.foto_path %}
+                        <h5>10. Fotografía del avance o producto:</h5>
+                        <img src="/{{ proyecto.foto_path }}" alt="Fotografía del proyecto" class="img-fluid mt-2 border rounded" style="max-height: 300px;">
+                        {% endif %}
+                        
+                        <h5>11. Observaciones generales:</h5>
+                        <p>{{ proyecto.observaciones or 'Sin observaciones' }}</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('ver_registros') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver a los registros
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
