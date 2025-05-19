@@ -9,7 +9,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 mb-4">
+                    <div class="col-md-4 mb-4">
                         <div class="card h-100">
                             <div class="card-header bg-success text-white">
                                 <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Registro de Actividades</h5>
@@ -27,7 +27,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-4">
+                    <div class="col-md-4 mb-4">
                         <div class="card h-100">
                             <div class="card-header bg-info text-white">
                                 <h5 class="mb-0"><i class="bi bi-folder-check"></i> Registro de Proyectos</h5>
@@ -39,9 +39,25 @@
                                     <li>Incluya toda la información relevante sobre materiales y equipos utilizados.</li>
                                     <li>Adjunte fotografías del avance o producto final del proyecto.</li>
                                 </ul>
-                                <!-- <div class="mb-4"></div> -->
                                 <a href="{{ url_for('proyectos_form') }}" class="btn btn-info w-100 text-white">
                                     <i class="bi bi-plus-circle"></i> Nuevo Registro de Proyecto
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="bi bi-journal-plus"></i> Solicitud Formulario de Trabajo</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Solicite formalmente un trabajo en el laboratorio. Complete todos los campos requeridos y adjunte documentación si corresponde.</p>
+                                <ul>
+                                    <li>La solicitud será revisada y notificada al responsable del laboratorio.</li>
+                                    <li>Puede adjuntar planos, diseños o documentos complementarios.</li>
+                                </ul>
+                                <a href="{{ url_for('solicitud_trabajo') }}" class="btn btn-warning w-100 text-dark">
+                                    <i class="bi bi-plus-circle"></i> Nueva Solicitud de Trabajo
                                 </a>
                             </div>
                         </div>

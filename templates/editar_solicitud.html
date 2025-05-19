@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Editar Solicitud{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Solicitud #{{ solicitud.id }}</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Nombre del Proyecto</label>
+            <input type="text" class="form-control" name="nombre_proyecto" value="{{ solicitud.nombre_proyecto }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Descripción del Trabajo</label>
+            <textarea class="form-control" name="descripcion_trabajo">{{ solicitud.descripcion_trabajo }}</textarea>
+        </div>
+        <!-- Agrega aquí más campos según lo que quieras permitir editar -->
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{{ url_for('ver_solicitud', solicitud_id=solicitud.id) }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

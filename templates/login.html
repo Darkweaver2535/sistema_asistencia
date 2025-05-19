@@ -2,28 +2,38 @@
 
 {% block content %}
 <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="col-md-6">
-        <div class="text-center mb-4">
-            <div style="background: white; padding: 15px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                <img src="/static/images/emi_logo.png" alt="Logo de la Institución" style="max-width: 150px;">
-            </div>
-        </div>
-        <div class="card" style="background: rgba(255, 255, 255, 0.9); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <div class="card-header bg-primary text-white text-center">
-                <h4 class="mb-0">Inicio de Sesión</h4>
-            </div>
-            <div class="card-body">
-                <form method="post" action="/login">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Usuario</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg" style="border-radius: 1.5rem; overflow: hidden;">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div style="background: white; padding: 18px; border-radius: 1rem; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.10);">
+                        <img src="/static/images/emi_logo.png" alt="Logo de la Institución" style="max-width: 120px;">
                     </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    <h2 class="mt-3 mb-1 fw-bold" style="color: #0056b3; letter-spacing: 0.02em;"> Gestión Integral</h2>
+                    <p class="text-muted mb-0" style="font-size: 1.1rem;">Laboratorio de Metal y Mecánica <br> EMI 2025</p>
+                </div>
+                <form method="post" action="/login" autocomplete="off">
+                    <div class="mb-4">
+                        <label for="username" class="form-label fw-semibold">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-primary text-white"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required autofocus>
+                        </div>
                     </div>
-                    <button type="submit" class="btn" style="background-color: #FFC107; color: white; font-weight: bold; width: 100%;">Continuar</button>
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-primary text-white"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="font-size: 1.1rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); letter-spacing: 0.03em;">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+                    </button>
                 </form>
+                <div class="text-center mt-4">
+                    <small class="text-muted">¿Olvidaste tu contraseña? Contacta al administrador.</small>
+                </div>
             </div>
         </div>
     </div>

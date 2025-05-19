@@ -1,0 +1,267 @@
+{% extends "layout.html" %}
+
+{% block title %}Solicitud de Trabajo - Laboratorio{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-clipboard-list"></i> Solicitud de Trabajo en Laboratorio</h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('solicitud_trabajo') }}" enctype="multipart/form-data">
+                        
+                        <!-- Información del Solicitante -->
+                        <div class="section-divider mb-4">
+                            <h5 class="text-primary border-bottom pb-2">Información del Solicitante</h5>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nombre_solicitante" class="form-label">Nombre del Solicitante *</label>
+                                <input type="text" class="form-control" id="nombre_solicitante" name="nombre_solicitante" 
+                                       value="{{ session['full_name'] }}" readonly required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="area_asignada" class="form-label">Área Asignada *</label>
+                                <input type="text" class="form-control" id="area_asignada" name="area_asignada" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="cargo_funcion" class="form-label">Cargo/Función *</label>
+                                <input type="text" class="form-control" id="cargo_funcion" name="cargo_funcion" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nombre_proyecto" class="form-label">Nombre del Proyecto *</label>
+                                <input type="text" class="form-control" id="nombre_proyecto" name="nombre_proyecto" required>
+                            </div>
+                        </div>
+
+                        <!-- Descripción del Trabajo -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h5 class="text-primary border-bottom pb-2">Descripción del Trabajo</h5>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descripcion_trabajo" class="form-label">Descripción Detallada del Trabajo *</label>
+                            <textarea class="form-control" id="descripcion_trabajo" name="descripcion_trabajo" 
+                                      rows="4" required placeholder="Describa detalladamente el trabajo a realizar..."></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="equipos" class="form-label">Equipos Requeridos</label>
+                                <textarea class="form-control" id="equipos" name="equipos" rows="3" 
+                                          placeholder="Liste los equipos necesarios..."></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="materiales" class="form-label">Materiales Requeridos</label>
+                                <textarea class="form-control" id="materiales" name="materiales" rows="3" 
+                                          placeholder="Liste los materiales necesarios..."></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="herramientas" class="form-label">Herramientas Requeridas</label>
+                                <textarea class="form-control" id="herramientas" name="herramientas" rows="3" 
+                                          placeholder="Liste las herramientas necesarias..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Programación -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h5 class="text-primary border-bottom pb-2">Programación del Trabajo</h5>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="fecha_inicio" class="form-label">Fecha de Inicio *</label>
+                                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="hora_inicio" class="form-label">Hora de Inicio *</label>
+                                <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="fecha_fin" class="form-label">Fecha de Fin *</label>
+                                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="hora_fin" class="form-label">Hora de Fin *</label>
+                                <input type="time" class="form-control" id="hora_fin" name="hora_fin" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="duracion_estimada" class="form-label">Duración Estimada (horas)</label>
+                                <input type="number" class="form-control" id="duracion_estimada" name="duracion_estimada" 
+                                       step="0.5" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="personal_involucrado" class="form-label">Personal Involucrado</label>
+                                <input type="text" class="form-control" id="personal_involucrado" name="personal_involucrado" 
+                                       placeholder="Nombres del personal que participará">
+                            </div>
+                        </div>
+
+                        <!-- Apoyo Técnico -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h5 class="text-primary border-bottom pb-2">Requerimientos Adicionales</h5>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="requiere_apoyo_tecnico" 
+                                       name="requiere_apoyo_tecnico" value="true">
+                                <label class="form-check-label" for="requiere_apoyo_tecnico">
+                                    Requiere Apoyo Técnico Especializado
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observaciones" class="form-label">Observaciones Generales</label>
+                            <textarea class="form-control" id="observaciones" name="observaciones" rows="3" 
+                                      placeholder="Observaciones adicionales..."></textarea>
+                        </div>
+
+                        <!-- Archivos Adjuntos -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h5 class="text-primary border-bottom pb-2">Archivos Adjuntos</h5>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="archivo_adjuntos" class="form-label">Adjuntar Archivos</label>
+                                <input class="form-control" type="file" id="archivo_adjuntos" name="archivo_adjuntos" 
+                                       multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.dwg,.dxf">
+                                <div class="form-text">
+                                    Formatos permitidos: PDF, DOC, DOCX, JPG, PNG, DWG, DXF. Máximo 10MB por archivo.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tipo_archivos" class="form-label">Tipo de Archivos</label>
+                                <select class="form-select" id="tipo_archivos" name="tipo_archivos">
+                                    <option value="">Seleccione el tipo...</option>
+                                    <option value="planos">Planos/Diseños</option>
+                                    <option value="especificaciones">Especificaciones Técnicas</option>
+                                    <option value="manuales">Manuales/Procedimientos</option>
+                                    <option value="imagenes">Imágenes de Referencia</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="medio_entrega" class="form-label">Medio de Entrega Preferido</label>
+                                <select class="form-select" id="medio_entrega" name="medio_entrega">
+                                    <option value="">Seleccione...</option>
+                                    <option value="digital">Entrega Digital</option>
+                                    <option value="fisico">Entrega Física</option>
+                                    <option value="ambos">Ambos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="observaciones_planos" class="form-label">Observaciones sobre Archivos</label>
+                                <input type="text" class="form-control" id="observaciones_planos" name="observaciones_planos" 
+                                       placeholder="Observaciones adicionales sobre los archivos...">
+                            </div>
+                        </div>
+
+                        <!-- Firma y Envío -->
+                        <div class="section-divider mb-4 mt-4">
+                            <h5 class="text-primary border-bottom pb-2">Confirmación</h5>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmar_datos" required>
+                                <label class="form-check-label" for="confirmar_datos">
+                                    Confirmo que toda la información proporcionada es correcta y completa *
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="acepto_terminos" required>
+                                <label class="form-check-label" for="acepto_terminos">
+                                    Acepto los términos y condiciones de uso del laboratorio *
+                                </label>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="fecha_solicitud" value="{{ current_date.strftime('%Y-%m-%d %H:%M:%S') }}">
+
+                        <!-- Botones -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i> Enviar Solicitud
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Calcular duración automáticamente
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaInicio = document.getElementById('fecha_inicio');
+    const horaInicio = document.getElementById('hora_inicio');
+    const fechaFin = document.getElementById('fecha_fin');
+    const horaFin = document.getElementById('hora_fin');
+    const duracionEstimada = document.getElementById('duracion_estimada');
+
+    function calcularDuracion() {
+        if (fechaInicio.value && horaInicio.value && fechaFin.value && horaFin.value) {
+            const inicio = new Date(fechaInicio.value + 'T' + horaInicio.value);
+            const fin = new Date(fechaFin.value + 'T' + horaFin.value);
+            
+            if (fin > inicio) {
+                const diferencia = (fin - inicio) / (1000 * 60 * 60); // Convertir a horas
+                duracionEstimada.value = diferencia.toFixed(1);
+            }
+        }
+    }
+
+    fechaInicio.addEventListener('change', calcularDuracion);
+    horaInicio.addEventListener('change', calcularDuracion);
+    fechaFin.addEventListener('change', calcularDuracion);
+    horaFin.addEventListener('change', calcularDuracion);
+
+    // Validar que la fecha de fin sea posterior a la de inicio
+    fechaFin.addEventListener('change', function() {
+        if (fechaInicio.value && fechaFin.value && fechaFin.value < fechaInicio.value) {
+            alert('La fecha de fin debe ser igual o posterior a la fecha de inicio');
+            fechaFin.value = '';
+        }
+    });
+});
+</script>
+
+{% endblock %}

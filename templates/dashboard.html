@@ -45,6 +45,55 @@
         </div>
     </div>
 </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    {% if category == 'solicitud_estado' %}
+      <div class="modal fade show" id="estadoSolicitudModal" tabindex="-1" aria-modal="true" style="display:block; background:rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-warning">
+              <h5 class="modal-title">Notificación de Solicitud</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar" onclick="$('#estadoSolicitudModal').remove();"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-0">{{ message }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        // Evita cerrar con click fuera del modal
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+      </script>
+    {% endif %}
+  {% endfor %}
+{% endwith %}
+
+{% if user.notificacion %}
+<div class="modal fade show" id="notificacionModal" tabindex="-1" aria-modal="true" style="display:block; background:rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">Notificación de Solicitud</h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" onclick="cerrarNotificacion()"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">{{ user.notificacion }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function cerrarNotificacion() {
+    fetch('/usuario/ocultar_notificacion', {method: 'POST'})
+      .then(() => { document.getElementById('notificacionModal').remove(); });
+}
+document.body.classList.add('modal-open');
+document.body.style.overflow = 'hidden';
+</script>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

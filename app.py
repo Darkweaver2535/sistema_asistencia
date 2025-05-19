@@ -1,9 +1,9 @@
 import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 import os
-import datetime
 import database
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -25,7 +25,7 @@ def index():
     if 'user_id' in session:
         user = database.get_user(session['username'])
         pending_checkout = database.get_pending_checkout(user['id'])
-        current_date = datetime.datetime.now()
+        current_date = datetime.now()
         return render_template('dashboard.html', user=user, pending_checkout=pending_checkout, current_date=current_date)
     return render_template('login.html')
 
@@ -178,9 +178,9 @@ def reports():
     for record in records:
         rec = dict(record)
         if rec['check_in']:
-            rec['check_in'] = datetime.datetime.fromisoformat(rec['check_in'])
+            rec['check_in'] = datetime.fromisoformat(rec['check_in'])
         if rec['check_out']:
-            rec['check_out'] = datetime.datetime.fromisoformat(rec['check_out'])
+            rec['check_out'] = datetime.fromisoformat(rec['check_out'])
             if rec['check_in']:
                 # Calcular horas trabajadas
                 diff = rec['check_out'] - rec['check_in']
@@ -204,7 +204,7 @@ def laboratorio():
 def actividades_form():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    current_date = datetime.datetime.now()
+    current_date = datetime.now()
     if request.method == 'POST':
         data = {
             'fecha': request.form.get('fecha'),
@@ -225,7 +225,7 @@ def actividades_form():
         # Guardar foto si existe
         foto = request.files.get('foto')
         if foto and foto.filename:
-            filename = secure_filename(f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{foto.filename}")
+            filename = secure_filename(f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{foto.filename}")
             foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             data['foto_path'] = f"{UPLOAD_FOLDER}/{filename}"
         actividad_id = database.add_actividad(data)
@@ -246,7 +246,7 @@ def actividad_pdf(form_id):
     actividad = database.get_actividad(form_id)
     if not actividad:
         return "No encontrado", 404
-    current_date = datetime.datetime.now()
+    current_date = datetime.now()
     return render_template('actividad_pdf.html', actividad=actividad, current_date=current_date)
 
 # --- Registro de Proyectos ---
@@ -254,7 +254,7 @@ def actividad_pdf(form_id):
 def proyectos_form():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    current_date = datetime.datetime.now()
+    current_date = datetime.now()
     if request.method == 'POST':
         data = {
             'fecha_inicio': request.form.get('fecha_inicio'),
@@ -275,7 +275,7 @@ def proyectos_form():
         }
         foto = request.files.get('foto')
         if foto and foto.filename:
-            filename = secure_filename(f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{foto.filename}")
+            filename = secure_filename(f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{foto.filename}")
             foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             data['foto_path'] = f"{UPLOAD_FOLDER}/{filename}"
         proyecto_id = database.add_proyecto(data)
@@ -296,7 +296,7 @@ def proyecto_pdf(form_id):
     proyecto = database.get_proyecto(form_id)
     if not proyecto:
         return "No encontrado", 404
-    current_date = datetime.datetime.now()
+    current_date = datetime.now()
     return render_template('proyecto_pdf.html', proyecto=proyecto, current_date=current_date)
 
 # --- Listado de registros (ambos formularios) ---
@@ -308,15 +308,187 @@ def ver_registros():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     actividades = database.get_actividades(user_id, start_date, end_date)
-    proyectos = database.get_proyectos(start_date, end_date)
+    proyectos = database.get_proyectos(user_id, start_date, end_date)
+    solicitudes = database.get_solicitudes_trabajo(user_id, start_date, end_date)
     users = database.get_users()
     selected_user = user_id if user_id else ''
-    return render_template('ver_registros.html', actividades=actividades, proyectos=proyectos, users=users, selected_user=selected_user, start_date=start_date, end_date=end_date)
+    return render_template('ver_registros.html', actividades=actividades, proyectos=proyectos, solicitudes=solicitudes, users=users, selected_user=selected_user, start_date=start_date, end_date=end_date)
+
+# --- Solicitud de Formulario de Trabajo ---
+
+@app.route('/laboratorio/solicitud_trabajo', methods=['GET', 'POST'])
+def solicitud_trabajo():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    current_date = datetime.now()
+    if request.method == 'POST':
+        data = {
+            'fecha_solicitud': request.form.get('fecha_solicitud'),
+            'solicitante_id': session['user_id'],
+            'nombre_solicitante': session.get('full_name'),
+            'area_asignada': ', '.join(request.form.getlist('area_asignada')),
+            'cargo_funcion': request.form.get('cargo_funcion'),
+            'nombre_proyecto': request.form.get('nombre_proyecto'),
+            'descripcion_trabajo': request.form.get('descripcion_trabajo'),
+            'equipos': request.form.get('equipos'),
+            'materiales': request.form.get('materiales'),
+            'herramientas': request.form.get('herramientas'),
+            'fecha_inicio': request.form.get('fecha_inicio'),
+            'hora_inicio': request.form.get('hora_inicio'),
+            'fecha_fin': request.form.get('fecha_fin'),
+            'hora_fin': request.form.get('hora_fin'),
+            'duracion_estimada': request.form.get('duracion_estimada'),
+            'requiere_apoyo_tecnico': 1 if request.form.get('requiere_apoyo_tecnico') == 'Si' else 0,
+            'observaciones': request.form.get('observaciones'),
+            'personal_involucrado': request.form.get('personal_involucrado'),
+            'planos_adjuntos': 0,  # o 1 si quieres marcar por defecto
+            'tipo_archivos': request.form.get('tipo_archivos', ''),
+            'medio_entrega': request.form.get('medio_entrega', ''),
+            'observaciones_planos': request.form.get('observaciones_planos', ''),
+            'firma_solicitante': '',  # o lo que corresponda
+            'fecha_firma': '',
+            'revisado_por': '',
+            'firma_revisado': '',
+            'aprobado_por': '',
+            'firma_aprobado': '',
+            'archivo_adjuntos_path': None,
+            'estado': 'pendiente'
+            
+        }
+        # Guardar archivo adjunto si existe
+        archivo = request.files.get('archivo_adjuntos')
+        if archivo and archivo.filename:
+            filename = secure_filename(f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{archivo.filename}")
+            archivo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            data['archivo_adjuntos_path'] = f"{UPLOAD_FOLDER}/{filename}"
+        solicitud_id = database.add_solicitud_trabajo(data)
+        flash('Solicitud enviada correctamente', 'success')
+        return redirect(url_for('ver_solicitud', solicitud_id=solicitud_id))
+    return render_template('solicitud_trabajo.html', current_date=current_date)
+
+@app.route('/laboratorio/solicitud_trabajo/<int:solicitud_id>')
+def ver_solicitud(solicitud_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    solicitud = database.get_solicitud_trabajo(solicitud_id)
+    if not solicitud:
+        flash('Solicitud no encontrada', 'error')
+        return redirect(url_for('laboratorio'))
+    return render_template('ver_solicitud.html', solicitud=solicitud)
+
+@app.route('/laboratorio/solicitud_trabajo/pdf/<int:solicitud_id>')
+def solicitud_pdf(solicitud_id):
+    solicitud = database.get_solicitud_trabajo(solicitud_id)
+    if not solicitud:
+        return "No encontrado", 404
+    current_date = datetime.now().strftime('%d/%m/%Y %H:%M')
+    return render_template('solicitud_pdf.html', solicitud=solicitud, current_date=current_date)
+
+# --- Listar solicitudes y notificaciones (solo admin) ---
+@app.route('/notificaciones')
+def notificaciones():
+    if 'user_id' not in session or not session.get('is_admin'):
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('index'))
+    solicitudes = database.get_solicitudes_trabajo()
+    stats = {
+        'pendientes': sum(1 for s in solicitudes if s['estado'] == 'pendiente'),
+        'revisado': sum(1 for s in solicitudes if s['estado'] == 'revisado'),
+        'aprobado': sum(1 for s in solicitudes if s['estado'] == 'aprobado'),
+        'rechazado': sum(1 for s in solicitudes if s['estado'] == 'rechazado'),
+    }
+    return render_template('notificaciones.html', solicitudes=solicitudes, stats=stats)
+
+# --- Cambiar estado de solicitud (solo admin) ---
+@app.route('/notificaciones/estado/<int:solicitud_id>', methods=['GET', 'POST'])
+def cambiar_estado_solicitud(solicitud_id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('index'))
+    nuevo_estado = request.args.get('estado') or request.form.get('estado')
+    if not nuevo_estado:
+        flash('Estado no especificado', 'error')
+        return redirect(url_for('notificaciones'))
+    database.update_estado_solicitud(solicitud_id, nuevo_estado)
+    # Notificación persistente para el solicitante
+    solicitud = database.get_solicitud_trabajo(solicitud_id)
+    if solicitud:
+        mensaje = None
+        if nuevo_estado == 'aprobado':
+            mensaje = f"Tu solicitud de trabajo N° {solicitud_id} ha sido APROBADA."
+        elif nuevo_estado == 'rechazado':
+            mensaje = f"Tu solicitud de trabajo N° {solicitud_id} ha sido RECHAZADA."
+        if mensaje:
+            database.set_user_notification(solicitud['solicitante_id'], mensaje)
+    flash(f'Solicitud cambiada a {nuevo_estado}', 'success')
+    return redirect(url_for('notificaciones'))
+
+# --- Editar solicitud ---
+@app.route('/solicitudes/editar/<int:id>', methods=['GET', 'POST'], endpoint='solicitudes.editar')
+def solicitudes_editar(id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('index'))
+    solicitud = database.get_solicitud_trabajo(id)
+    if not solicitud:
+        flash('Solicitud no encontrada', 'error')
+        return redirect(url_for('notificaciones'))
+    if request.method == 'POST':
+        # Actualiza los campos necesarios aquí
+        # database.update_solicitud_trabajo(id, request.form)
+        flash('Solicitud actualizada correctamente', 'success')
+        return redirect(url_for('ver_solicitud', solicitud_id=id))
+    return render_template('editar_solicitud.html', solicitud=solicitud)
+
+# --- Aprobar solicitud ---
+@app.route('/solicitudes/aprobar/<int:id>', endpoint='solicitudes.aprobar')
+def solicitudes_aprobar(id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('index'))
+    database.update_estado_solicitud(id, 'aprobado')
+    flash('Solicitud aprobada', 'success')
+    return redirect(url_for('ver_solicitud', solicitud_id=id))
+
+# --- Rechazar solicitud ---
+@app.route('/solicitudes/rechazar/<int:id>', endpoint='solicitudes.rechazar')
+def solicitudes_rechazar(id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('index'))
+    database.update_estado_solicitud(id, 'rechazado')
+    flash('Solicitud rechazada', 'info')
+    return redirect(url_for('ver_solicitud', solicitud_id=id))
+
+# --- Duplicar solicitud ---
+@app.route('/solicitudes/duplicar/<int:id>', endpoint='solicitudes.duplicar')
+def solicitudes_duplicar(id):
+    if 'user_id' not in session or not session.get('is_admin'):
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('index'))
+    nueva_id = database.duplicar_solicitud_trabajo(id)
+    flash('Solicitud duplicada', 'success')
+    return redirect(url_for('ver_solicitud', solicitud_id=nueva_id))
 
 # --- Servir archivos subidos (fotos) ---
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+@app.route('/usuario/ocultar_notificacion', methods=['POST'])
+def ocultar_notificacion():
+    if 'user_id' not in session:
+        return '', 401
+    database.set_user_notification(session['user_id'], None)
+    return '', 204
+
+@app.context_processor
+def inject_pendientes_count():
+    if 'user_id' in session and session.get('is_admin'):
+        solicitudes = database.get_solicitudes_trabajo()
+        pendientes = sum(1 for s in solicitudes if s['estado'] == 'pendiente')
+        return dict(num_pendientes=pendientes)
+    return dict(num_pendientes=0)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
