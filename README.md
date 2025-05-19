@@ -1,6 +1,6 @@
 # Sistema de Gestión Integral
 
-Este sistema de asistencia está destinado para el laboratorio de Metal Mecánica (DNICYT) situado en Alto Irpavi de la Escuela Militar de Ingeniería, desarrollado por Alvaro Encinas.
+Este sistema de asistencia está destinado para el laboratorio de Metal Mecánica (DNICYT) situado en Alto Irpavi de la Escuela Militar de Ingeniería, desarrollado por Alvaro S. Encinas Flores.
 
 ## Descripción
 
