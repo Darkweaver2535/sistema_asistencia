@@ -1,0 +1,457 @@
+{% extends 'layout.html' %}
+
+{% block title %}Detalle de Solicitud - Sistema de Trabajo{% endblock %}
+
+{% block content %}
+<style>
+    .modern-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 6px 32px 0 rgba(0,0,0,0.13), 0 1.5px 6px 0 rgba(0,0,0,0.07);
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+        border: none;
+    }
+    .section-header {
+        background: #0d6efd;
+        color: #fff;
+        padding: 14px 22px;
+        border-radius: 8px;
+        margin-bottom: 22px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px 0 rgba(13,110,253,0.08);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .info-row {
+        margin-bottom: 18px;
+    }
+    .label {
+        font-weight: 700;
+        color: #0d6efd;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .status-badge {
+        font-size: 1em;
+        padding: 10px 22px;
+        border-radius: 20px;
+        background: #0d6efd;
+        color: #fff;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+    }
+    .action-buttons {
+        background: #fff;
+        padding: 18px 0 18px 0;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+    }
+    .action-buttons .btn {
+        margin-right: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .btn-primary, .dropdown-menu .dropdown-item.active, .dropdown-menu .dropdown-item:active {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        color: #fff !important;
+    }
+    .btn-warning {
+        background-color: #ffc107 !important;
+        border-color: #ffc107 !important;
+        color: #232526 !important;
+    }
+    .btn-info {
+        background-color: #0dcaf0 !important;
+        border-color: #0dcaf0 !important;
+        color: #232526 !important;
+    }
+    .signature-box {
+        border: 2px dashed #0d6efd;
+        padding: 18px;
+        border-radius: 10px;
+        background: #f8f9fa;
+        margin-bottom: 18px;
+        min-height: 120px;
+        box-shadow: 0 2px 8px 0 rgba(13,110,253,0.04);
+    }
+    .file-link {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .file-link:hover {
+        color: #ffc107;
+        text-decoration: underline;
+    }
+    .border.bg-light {
+        background: #f8f9fa !important;
+        border: 1.5px solid #0d6efd !important;
+    }
+    .badge.bg-success, .badge.bg-danger, .badge.bg-warning, .badge.bg-secondary, .badge.bg-info, .badge.bg-primary {
+        font-size: 1em;
+        padding: 7px 18px;
+        border-radius: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .row.info-row > div {
+        margin-bottom: 18px;
+    }
+    code {
+        background: #232526;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 1em;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+            <div class="modern-card">
+                <!-- Botones de acción -->
+                {% if session.get('is_admin') %}
+                <div class="action-buttons d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <a href="{{ url_for('notificaciones') }}" class="btn btn-outline-dark">
+                            <i class="fas fa-arrow-left"></i> Volver a la lista
+                        </a>
+                    </div>
+                    <div>
+                        {% if solicitud.estado == 'pendiente' %}
+                            <a href="{{ url_for('solicitudes.editar', id=solicitud.id) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                        {% endif %}
+                        <a href="{{ url_for('solicitud_pdf', solicitud_id=solicitud.id) }}" class="btn btn-info" target="_blank">
+                            <i class="fas fa-print"></i> Imprimir
+                        </a>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog"></i> Acciones
+                            </button>
+                            <ul class="dropdown-menu">
+                                {% if solicitud.estado == 'pendiente' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('solicitudes.aprobar', id=solicitud.id) }}">
+                                        <i class="fas fa-check text-success"></i> Aprobar
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('solicitudes.rechazar', id=solicitud.id) }}">
+                                        <i class="fas fa-times text-danger"></i> Rechazar
+                                    </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('solicitudes.duplicar', id=solicitud.id) }}">
+                                    <i class="fas fa-copy text-info"></i> Duplicar
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="action-buttons d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <a href="{{ url_for('notificaciones') }}" class="btn btn-outline-dark">
+                            <i class="fas fa-arrow-left"></i> Volver a la lista
+                        </a>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('solicitud_pdf', solicitud_id=solicitud.id) }}" class="btn btn-info" target="_blank">
+                            <i class="fas fa-print"></i> Imprimir
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Título y estado -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <h2 class="mb-0 fw-bold text-dark">Solicitud de Trabajo #{{ solicitud.id }}</h2>
+                            <span class="status-badge">
+                                {{ solicitud.estado.replace('_', ' ').title() }}
+                            </span>
+                        </div>
+                        <p class="text-muted mb-0 mt-2">
+                            <i class="fas fa-calendar"></i> 
+                            Creada el
+                            {% set fecha = solicitud.created_at %}
+                            {% if fecha %}
+                                {{ fecha[8:10] }}/{{ fecha[5:7] }}/{{ fecha[0:4] }} a las {{ fecha[11:16] }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Información general -->
+                <div class="section-header">
+                    <i class="fas fa-info-circle"></i> Información General
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Fecha de Solicitud:</div>
+                        <div>
+                            {% set fecha = solicitud.fecha_solicitud %}
+                            {{ (fecha[8:10] ~ '/' ~ fecha[5:7] ~ '/' ~ fecha[0:4]) if fecha else 'N/A' }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">ID Solicitante:</div>
+                        <div>{{ solicitud.solicitante_id or 'N/A' }}</div>
+                    </div>
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Nombre del Solicitante:</div>
+                        <div>{{ solicitud.nombre_solicitante or 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">Área Asignada:</div>
+                        <div>{{ solicitud.area_asignada or 'N/A' }}</div>
+                    </div>
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Cargo/Función:</div>
+                        <div>{{ solicitud.cargo_funcion or 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">Nombre del Proyecto:</div>
+                        <div>{{ solicitud.nombre_proyecto or 'N/A' }}</div>
+                    </div>
+                </div>
+
+                <!-- Descripción del trabajo -->
+                <div class="section-header">
+                    <i class="fas fa-clipboard-list"></i> Descripción del Trabajo
+                </div>
+                <div class="row info-row">
+                    <div class="col-12">
+                        <div class="label">Descripción:</div>
+                        <div class="border p-3 rounded bg-light">
+                            {{ solicitud.descripcion_trabajo or 'Sin descripción' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recursos necesarios -->
+                <div class="section-header">
+                    <i class="fas fa-tools"></i> Recursos Necesarios
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-4">
+                        <div class="label">Equipos:</div>
+                        <div class="border p-3 rounded bg-light">
+                            {{ solicitud.equipos or 'No especificado' }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="label">Materiales:</div>
+                        <div class="border p-3 rounded bg-light">
+                            {{ solicitud.materiales or 'No especificado' }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="label">Herramientas:</div>
+                        <div class="border p-3 rounded bg-light">
+                            {{ solicitud.herramientas or 'No especificado' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Programación -->
+                <div class="section-header">
+                    <i class="fas fa-clock"></i> Programación
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-3">
+                        <div class="label">Fecha de Inicio:</div>
+                        {% set fecha = solicitud.fecha_inicio %}
+                        <div>{{ (fecha[8:10] ~ '/' ~ fecha[5:7] ~ '/' ~ fecha[0:4]) if fecha else 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="label">Hora de Inicio:</div>
+                        {% set hora = solicitud.hora_inicio %}
+                        <div>{{ hora[:5] if hora else 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="label">Fecha de Fin:</div>
+                        {% set fecha = solicitud.fecha_fin %}
+                        <div>{{ (fecha[8:10] ~ '/' ~ fecha[5:7] ~ '/' ~ fecha[0:4]) if fecha else 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="label">Hora de Fin:</div>
+                        {% set hora = solicitud.hora_fin %}
+                        <div>{{ hora[:5] if hora else 'N/A' }}</div>
+                    </div>
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Duración Estimada:</div>
+                        <div>{{ solicitud.duracion_estimada or 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">Requiere Apoyo Técnico:</div>
+                        <div>
+                            {% if solicitud.requiere_apoyo_tecnico %}
+                                <span class="badge bg-success">Sí</span>
+                            {% else %}
+                                <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal y observaciones -->
+                <div class="section-header">
+                    <i class="fas fa-users"></i> Personal y Observaciones
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Personal Involucrado:</div>
+                        <div class="border p-3 rounded bg-light">
+                            {{ solicitud.personal_involucrado or 'No especificado' }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">Observaciones:</div>
+                        <div class="border p-3 rounded bg-light">
+                            {{ solicitud.observaciones or 'Sin observaciones' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Planos y archivos -->
+                <div class="section-header">
+                    <i class="fas fa-file-alt"></i> Planos y Archivos
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Planos Adjuntos:</div>
+                        <div>
+                            {% if solicitud.planos_adjuntos %}
+                                <span class="badge bg-success">Sí</span>
+                            {% else %}
+                                <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">Tipo de Archivos:</div>
+                        <div>{{ solicitud.tipo_archivos or 'N/A' }}</div>
+                    </div>
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Medio de Entrega:</div>
+                        <div>{{ solicitud.medio_entrega or 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">Observaciones de Planos:</div>
+                        <div>{{ solicitud.observaciones_planos or 'Sin observaciones' }}</div>
+                    </div>
+                </div>
+                {% if solicitud.archivo_adjuntos_path %}
+                <div class="row info-row">
+                    <div class="col-12">
+                        <div class="label">Archivos Adjuntos:</div>
+                        <div>
+                            <a href="{{ url_for('static', filename='uploads/' + solicitud.archivo_adjuntos_path) }}" 
+                               class="file-link" target="_blank">
+                                <i class="fas fa-download"></i> Descargar archivos adjuntos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Firmas y aprobaciones -->
+                <div class="section-header">
+                    <i class="fas fa-signature"></i> Firmas y Aprobaciones
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="signature-box">
+                            <div class="label">Firma del Solicitante:</div>
+                            <div class="mb-2">
+                                {% if solicitud.firma_solicitante %}
+                                    <span class="badge bg-success">Firmado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Pendiente</span>
+                                {% endif %}
+                            </div>
+                            <div class="small text-muted">
+                                {% set fecha = solicitud.fecha_firma %}
+                                <div>
+                                    {% if fecha %}
+                                        {{ fecha[8:10] }}/{{ fecha[5:7] }}/{{ fecha[0:4] }} a las {{ fecha[11:16] }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="signature-box">
+                            <div class="label">Revisado por:</div>
+                            <div class="mb-2">{{ solicitud.revisado_por or 'N/A' }}</div>
+                            <div class="mb-2">
+                                {% if solicitud.firma_revisado %}
+                                    <span class="badge bg-success">Firmado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Pendiente</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="signature-box">
+                            <div class="label">Aprobado por:</div>
+                            <div class="mb-2">{{ solicitud.aprobado_por or 'N/A' }}</div>
+                            <div class="mb-2">
+                                {% if solicitud.firma_aprobado %}
+                                    <span class="badge bg-success">Firmado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Pendiente</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información del sistema -->
+                <div class="section-header mt-4">
+                    <i class="fas fa-info"></i> Información del Sistema
+                </div>
+                <div class="row info-row">
+                    <div class="col-md-6">
+                        <div class="label">Fecha de Creación:</div>
+                        {% set fecha = solicitud.created_at %}
+                        <div>
+                            {% if fecha %}
+                                {{ fecha[8:10] }}/{{ fecha[5:7] }}/{{ fecha[0:4] }} a las {{ fecha[11:16] }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">ID de la Solicitud:</div>
+                        <div><code>{{ solicitud.id }}</code></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

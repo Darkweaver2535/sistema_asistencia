@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Proyecto #{{ proyecto.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .field-label {
+            font-weight: bold;
+        }
+        .field-value {
+            margin-top: 3px;
+        }
+        .footer {
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            font-size: 10px;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+        }
+        .signature {
+            text-align: center;
+            width: 30%;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-bottom: 5px;
+            width: 100%;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+        .code {
+            margin-top: 0;
+            text-align: right;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="position: relative;">
+        <!-- Marca de agua: logo institucional -->
+        <img src="{{ url_for('static', filename='images/emi_logo.png') }}"
+             alt="Logo EMI"
+             style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                opacity: 0.08;
+                width: 60%;
+                max-width: 500px;
+                z-index: 0;
+                pointer-events: none;
+             ">
+        <div class="header" style="position: relative; z-index: 1;">
+            <p class="code">CÓDIGO: LABORG-PROY-{{ proyecto.id }}</p>
+            <h1 class="title">Registro de apoyo a proyectos de Investigación en el Laboratorio de Metal Mecánica</h1>
+            <p class="subtitle">VERSIÓN: 1</p>
+        </div>
+        
+        <table style="position: relative; z-index: 1;">
+            <tr>
+                <td class="field-label" width="30%">1. Fecha de inicio del apoyo:</td>
+                <td class="field-value" width="70%">{{ proyecto.fecha_inicio }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">2. Fecha de finalización:</td>
+                <td class="field-value">{{ proyecto.fecha_fin }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">3. Nombre del proyecto:</td>
+                <td class="field-value">{{ proyecto.nombre_proyecto }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">4. Tipo de trabajo:</td>
+                <td class="field-value">{{ proyecto.tipo_trabajo }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">5. Responsable del proyecto:</td>
+                <td class="field-value">{{ proyecto.responsable }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">6. Estudiantes o personal de apoyo:</td>
+                <td class="field-value">
+                    {% if proyecto.personal_apoyo1 %}
+                    <strong>Nombre 1 (área):</strong> {{ proyecto.personal_apoyo1 }} ({{ proyecto.personal_area1 }})<br>
+                    {% endif %}
+                    {% if proyecto.personal_apoyo2 %}
+                    <strong>Nombre 2 (área):</strong> {{ proyecto.personal_apoyo2 }} ({{ proyecto.personal_area2 }})
+                    {% endif %}
+                    {% if not proyecto.personal_apoyo1 and not proyecto.personal_apoyo2 %}
+                    No se registró personal de apoyo
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="field-label">7. Equipos utilizados:</td>
+                <td class="field-value">{{ proyecto.equipos }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">8. Materiales consumidos:</td>
+                <td class="field-value">{{ proyecto.materiales }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">9. Descripción del apoyo o trabajo:</td>
+                <td class="field-value">{{ proyecto.descripcion }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">11. Observaciones generales:</td>
+                <td class="field-value">{{ proyecto.observaciones or 'Sin observaciones' }}</td>
+            </tr>
+        </table>
+        
+        {% if proyecto.foto_path %}
+        <div class="section" style="position: relative; z-index: 1;">
+            <p class="field-label">10. Fotografía del avance o producto:</p>
+            <img src="{{ 'http://localhost/' + proyecto.foto_path }}" alt="Fotografía del proyecto" style="max-width: 400px; max-height: 300px;">
+        </div>
+        {% endif %}
+        
+        <!-- Firmas con más espacio -->
+        <div class="signatures" style="margin-top: 80px; position: relative; z-index: 1;">
+            <div class="signature">
+                <div class="signature-line" style="margin-bottom: 30px; border-top: 1.5px solid #000; height: 2px;"></div>
+                <p style="margin-bottom: 35px;">Elaborado por:</p>
+                <div class="signature-line" style="margin-bottom: 10px; border-top: 1px dotted #000; width: 90%;"></div>
+                <p style="margin-bottom: 35px;">Cargo:</p>
+                <div class="signature-line" style="margin-bottom: 10px; border-top: 1px dotted #000; width: 90%;"></div>
+                <p>Fecha:</p>
+            </div>
+            <div class="signature">
+                <div class="signature-line" style="margin-bottom: 30px; border-top: 1.5px solid #000; height: 2px;"></div>
+                <p style="margin-bottom: 35px;">Revisado por:</p>
+                <div class="signature-line" style="margin-bottom: 10px; border-top: 1px dotted #000; width: 90%;"></div>
+                <p style="margin-bottom: 35px;">Cargo:</p>
+                <div class="signature-line" style="margin-bottom: 10px; border-top: 1px dotted #000; width: 90%;"></div>
+                <p>Fecha:</p>
+            </div>
+            <div class="signature">
+                <div class="signature-line" style="margin-bottom: 30px; border-top: 1.5px solid #000; height: 2px;"></div>
+                <p style="margin-bottom: 35px;">Aprobado por:</p>
+                <div class="signature-line" style="margin-bottom: 10px; border-top: 1px dotted #000; width: 90%;"></div>
+                <p style="margin-bottom: 35px;">Cargo:</p>
+                <div class="signature-line" style="margin-bottom: 10px; border-top: 1px dotted #000; width: 90%;"></div>
+                <p>Fecha:</p>
+            </div>
+        </div>
+        
+        <div class="footer" style="position: relative; z-index: 1;">
+            <p>Documento generado el {{ current_date.strftime('%d-%m-%Y %H:%M:%S') }} - Escuela Militar de Ingeniería - Laboratorio de Metal y Mecánica</p>
+        </div>
+    </div>
+</body>
+</html>

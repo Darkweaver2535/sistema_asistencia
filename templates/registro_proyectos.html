@@ -1,0 +1,193 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-folder-check"></i> Registro de apoyo a proyectos de Investigación en el Laboratorio de Metal Mecánica</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('proyectos_form') }}" method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_inicio" class="form-label">1. Fecha de inicio del apoyo:</label>
+                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required value="{{ current_date.strftime('%Y-%m-%d') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_fin" class="form-label">2. Fecha de finalización (estimada o real):</label>
+                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="nombre_proyecto" class="form-label">3. Nombre del proyecto:</label>
+                        <input type="text" class="form-control" id="nombre_proyecto" name="nombre_proyecto" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">4. Tipo de trabajo:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Trabajo de grado" id="tipo1" required>
+                            <label class="form-check-label" for="tipo1">Trabajo de grado</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Proyecto de investigación" id="tipo2">
+                            <label class="form-check-label" for="tipo2">Proyecto de investigación</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Desarrollo institucional" id="tipo3">
+                            <label class="form-check-label" for="tipo3">Desarrollo institucional</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipo_trabajo" value="Otro" id="tipo4">
+                            <label class="form-check-label" for="tipo4">Otro:</label>
+                            <input type="text" class="form-control mt-2" id="otro_tipo" name="otro_tipo" placeholder="Especifique otro tipo de trabajo">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="responsable" class="form-label">5. Responsable del proyecto:</label>
+                        <input type="text" class="form-control" id="responsable" name="responsable" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">6. Estudiantes o personal de apoyo asignado:</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="personal_apoyo1" class="form-label">Nombre 1:</label>
+                                <input type="text" class="form-control" id="personal_apoyo1" name="personal_apoyo1">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="personal_area1" class="form-label">Área:</label>
+                                <input type="text" class="form-control" id="personal_area1" name="personal_area1">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label for="personal_apoyo2" class="form-label">Nombre 2:</label>
+                                <input type="text" class="form-control" id="personal_apoyo2" name="personal_apoyo2">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="personal_area2" class="form-label">Área:</label>
+                                <input type="text" class="form-control" id="personal_area2" name="personal_area2">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">7. Equipos utilizados:</label>
+                        <div class="row">
+                            {% for equipo in equipos %}
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="equipos" value="{{ equipo }}" id="equipo{{ loop.index }}">
+                                    <label class="form-check-label" for="equipo{{ loop.index }}">{{ equipo }}</label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="materiales" class="form-label">8. Materiales consumidos (tipo y cantidad):</label>
+                        <textarea class="form-control" id="materiales" name="materiales" rows="2" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">9. Breve descripción del apoyo o trabajo:</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="foto" class="form-label">10. Fotografía del avance, producto o actividad (opcional):</label>
+                        <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">11. Observaciones generales o lecciones aprendidas:</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-info btn-lg">
+                            <i class="bi bi-save"></i> Guardar Registro
+                        </button>
+                        <a href="{{ url_for('laboratorio') }}" class="btn btn-secondary btn-lg ms-2">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Lógica para el campo "Otro tipo" ---
+        const tipoOtro = document.getElementById('tipo4');
+        const otroTipoInput = document.getElementById('otro_tipo');
+        otroTipoInput.disabled = !tipoOtro.checked;
+        document.querySelectorAll('input[name="tipo_trabajo"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                otroTipoInput.disabled = !tipoOtro.checked;
+                if (!tipoOtro.checked) {
+                    otroTipoInput.value = '';
+                }
+            });
+        });
+
+        // --- Guardar y restaurar datos del formulario usando localStorage ---
+        const form = document.querySelector('form');
+        const storageKey = 'registro_proyectos_form';
+
+        // Restaurar datos si existen
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            const data = JSON.parse(saved);
+            for (const [key, value] of Object.entries(data)) {
+                const field = form.elements[key];
+                if (!field) continue;
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    if (Array.isArray(value)) {
+                        value.forEach(val => {
+                            const el = form.querySelector(`[name="${key}"][value="${val}"]`);
+                            if (el) el.checked = true;
+                        });
+                    } else {
+                        const el = form.querySelector(`[name="${key}"][value="${value}"]`);
+                        if (el) el.checked = true;
+                    }
+                } else {
+                    field.value = value;
+                }
+            }
+        }
+
+        // Guardar datos al escribir/cambiar
+        form.addEventListener('input', function() {
+            const data = {};
+            for (const el of form.elements) {
+                if (!el.name) continue;
+                if (el.type === 'checkbox') {
+                    if (!data[el.name]) data[el.name] = [];
+                    if (el.checked) data[el.name].push(el.value);
+                } else if (el.type === 'radio') {
+                    if (el.checked) data[el.name] = el.value;
+                } else if (el.type !== 'file') {
+                    data[el.name] = el.value;
+                }
+            }
+            localStorage.setItem(storageKey, JSON.stringify(data));
+        });
+
+        // Limpiar storage al enviar el formulario
+        form.addEventListener('submit', function() {
+            localStorage.removeItem(storageKey);
+        });
+    });
+</script>
+{% endblock %}

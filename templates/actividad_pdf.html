@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Actividad #{{ actividad.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .field-label {
+            font-weight: bold;
+        }
+        .field-value {
+            margin-top: 3px;
+        }
+        .footer {
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            font-size: 10px;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 80px;
+        }
+        .signature {
+            text-align: center;
+            width: 30%;
+        }
+        .signature-line {
+            border-top: 1.5px solid #000;
+            margin-bottom: 30px;
+            height: 2px;
+            width: 100%;
+        }
+        .signature-line-thin {
+            border-top: 1px dotted #000;
+            margin-bottom: 10px;
+            width: 90%;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+        .code {
+            margin-top: 0;
+            text-align: right;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="position: relative;">
+        <!-- Marca de agua: logo institucional -->
+        <img src="{{ url_for('static', filename='images/emi_logo.png') }}"
+             alt="Logo EMI"
+             style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                opacity: 0.08;
+                width: 60%;
+                max-width: 500px;
+                z-index: 0;
+                pointer-events: none;
+             ">
+        <div class="header" style="position: relative; z-index: 1;">
+            <p class="code">CÓDIGO: LABORG-ACT-{{ actividad.id }}</p>
+            <h1 class="title">Registro de Actividades en Laboratorio de Metal Mecánica</h1>
+            <p class="subtitle">VERSIÓN: 1</p>
+        </div>
+        
+        <table style="position: relative; z-index: 1;">
+            <tr>
+                <td class="field-label" width="30%">1. Fecha:</td>
+                <td class="field-value" width="70%">{{ actividad.fecha }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">2. Nombre del responsable:</td>
+                <td class="field-value">{{ actividad.responsable_nombre }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">3. Área asignada:</td>
+                <td class="field-value">{{ actividad.area }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">4. Proyecto asociado:</td>
+                <td class="field-value">{{ actividad.proyecto or 'No especificado' }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">5. Tipo de trabajo:</td>
+                <td class="field-value">{{ actividad.tipo_trabajo }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">6. Actividades realizadas:</td>
+                <td class="field-value">{{ actividad.actividades }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">7. Equipos utilizados:</td>
+                <td class="field-value">
+                    {{ actividad.equipos }}
+                    {% if actividad.otros_equipos %}
+                    <br><strong>Otros equipos:</strong> {{ actividad.otros_equipos }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="field-label">8. Tiempo estimado de uso:</td>
+                <td class="field-value">{{ actividad.tiempo_uso }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">9. ¿Hubo incidentes o fallas?</td>
+                <td class="field-value">
+                    {{ 'Sí' if actividad.incidentes else 'No' }}
+                    {% if actividad.incidentes and actividad.detalles_incidentes %}
+                    <br><strong>Detalles:</strong> {{ actividad.detalles_incidentes }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="field-label">10. Observaciones y recomendaciones:</td>
+                <td class="field-value">{{ actividad.observaciones or 'Sin observaciones' }}</td>
+            </tr>
+        </table>
+        
+        {% if actividad.foto_path %}
+        <div class="section" style="position: relative; z-index: 1;">
+            <p class="field-label">11. Fotografía del trabajo o actividad:</p>
+            <img src="{{ 'http://localhost/' + actividad.foto_path }}" alt="Fotografía de la actividad" style="max-width: 400px; max-height: 300px;">
+        </div>
+        {% endif %}
+        
+        <div class="section" style="position: relative; z-index: 1;">
+            <h3>Normativa del uso del formulario:</h3>
+            <ul>
+                <li>El registro es individual y debe llenarse de manera simultánea al trabajo o al finalizar la jornada.</li>
+                <li>Toda la información debe ser precisa, clara y verificable.</li>
+                <li>El uso indebido de este formulario o la omisión de información importante será comunicado a la coordinación del laboratorio.</li>
+            </ul>
+        </div>
+        
+        <div class="signatures" style="position: relative; z-index: 1;">
+            <div class="signature">
+                <div class="signature-line"></div>
+                <p style="margin-bottom: 35px;">Elaborado por:</p>
+                <div class="signature-line-thin"></div>
+                <p style="margin-bottom: 35px;">Cargo:</p>
+                <div class="signature-line-thin"></div>
+                <p>Fecha:</p>
+            </div>
+            <div class="signature">
+                <div class="signature-line"></div>
+                <p style="margin-bottom: 35px;">Revisado por:</p>
+                <div class="signature-line-thin"></div>
+                <p style="margin-bottom: 35px;">Cargo:</p>
+                <div class="signature-line-thin"></div>
+                <p>Fecha:</p>
+            </div>
+            <div class="signature">
+                <div class="signature-line"></div>
+                <p style="margin-bottom: 35px;">Aprobado por:</p>
+                <div class="signature-line-thin"></div>
+                <p style="margin-bottom: 35px;">Cargo:</p>
+                <div class="signature-line-thin"></div>
+                <p>Fecha:</p>
+            </div>
+        </div>
+        
+        <div class="footer" style="position: relative; z-index: 1;">
+            <p>Documento generado el {{ current_date.strftime('%d-%m-%Y %H:%M:%S') }} - Escuela Militar de Ingeniería - Laboratorio de Metal y Mecánica</p>
+        </div>
+    </div>
+</body>
+</html>

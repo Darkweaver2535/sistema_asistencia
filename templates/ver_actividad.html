@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-clipboard-check"></i> Detalle de Actividad #{{ actividad.id }}
+                    <div class="float-end">
+                        <a href="{{ url_for('actividad_pdf', form_id=actividad.id) }}" class="btn btn-sm btn-light" target="_blank">
+                            <i class="bi bi-file-pdf"></i> Exportar a PDF
+                        </a>
+                    </div>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>1. Fecha:</h5>
+                        <p>{{ actividad.fecha }}</p>
+                        
+                        <h5>2. Nombre del responsable:</h5>
+                        <p>{{ actividad.responsable_nombre }}</p>
+                        
+                        <h5>3. Área asignada:</h5>
+                        <p>{{ actividad.area }}</p>
+                        
+                        <h5>4. Proyecto asociado:</h5>
+                        <p>{{ actividad.proyecto or 'No especificado' }}</p>
+                        
+                        <h5>5. Tipo de trabajo:</h5>
+                        <p>{{ actividad.tipo_trabajo }}</p>
+                        
+                        <h5>6. Actividades realizadas:</h5>
+                        <p>{{ actividad.actividades }}</p>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>7. Equipos utilizados:</h5>
+                        <p>{{ actividad.equipos }}</p>
+                        {% if actividad.otros_equipos %}
+                        <p><strong>Otros equipos:</strong> {{ actividad.otros_equipos }}</p>
+                        {% endif %}
+                        
+                        <h5>8. Tiempo estimado de uso del equipo:</h5>
+                        <p>{{ actividad.tiempo_uso }}</p>
+                        
+                        <h5>9. ¿Hubo incidentes o fallas?</h5>
+                        <p>{{ 'Sí' if actividad.incidentes else 'No' }}</p>
+                        {% if actividad.incidentes and actividad.detalles_incidentes %}
+                        <p><strong>Detalles:</strong> {{ actividad.detalles_incidentes }}</p>
+                        {% endif %}
+                        
+                        <h5>10. Observaciones y recomendaciones:</h5>
+                        <p>{{ actividad.observaciones or 'Sin observaciones' }}</p>
+                        
+                        {% if actividad.foto_path %}
+                        <h5>11. Fotografía del trabajo:</h5>
+                        <img src="/{{ actividad.foto_path }}" alt="Fotografía de la actividad" class="img-fluid mt-2 border rounded" style="max-height: 300px;">
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('ver_registros') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver a los registros
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
