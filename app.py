@@ -175,6 +175,7 @@ def reports():
     
     # Procesar registros para calcular horas trabajadas
     processed_records = []
+    total_hours = 0
     for record in records:
         rec = dict(record)
         if rec['check_in']:
@@ -182,18 +183,20 @@ def reports():
         if rec['check_out']:
             rec['check_out'] = datetime.fromisoformat(rec['check_out'])
             if rec['check_in']:
-                # Calcular horas trabajadas
                 diff = rec['check_out'] - rec['check_in']
                 hours = diff.total_seconds() / 3600
                 rec['hours_worked'] = round(hours, 2)
+                total_hours += hours
             else:
                 rec['hours_worked'] = 0
         else:
             rec['hours_worked'] = 0
         processed_records.append(rec)
+    total_hours = round(total_hours, 2)
     
     return render_template('reports.html', users=users, records=processed_records, 
-                           selected_user=user_id, start_date=start_date, end_date=end_date)
+                           selected_user=user_id, start_date=start_date, end_date=end_date,
+                           total_hours=total_hours)
 
 @app.route('/laboratorio')
 def laboratorio():
