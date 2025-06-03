@@ -161,7 +161,7 @@
         {% if actividad.foto_path %}
         <div class="section" style="position: relative; z-index: 1;">
             <p class="field-label">11. Fotografía del trabajo o actividad:</p>
-            <img src="{{ 'http://localhost/' + actividad.foto_path }}" alt="Fotografía de la actividad" style="max-width: 400px; max-height: 300px;">
+            <img src="{{ request.url_root | trim('/') }}/{{ actividad.foto_path }}" alt="Fotografía de la actividad" style="max-width: 400px; max-height: 300px;">
         </div>
         {% endif %}
         
