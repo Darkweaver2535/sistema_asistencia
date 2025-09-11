@@ -497,9 +497,10 @@ def inject_pendientes_count():
     return dict(num_pendientes=0)
 
 def cleanup_incomplete_attendance():
-    """Función que se ejecuta periódicamente para limpiar asistencias incompletas"""
+    """Función que se ejecuta periódicamente para limpiar asistencias incompletas y anormales"""
     while True:
         try:
+            # 1. Limpiar registros pendientes (sin check_out) de más de 8 horas
             deleted_records = database.auto_delete_incomplete_attendance()
             
             if deleted_records:
@@ -521,6 +522,34 @@ def cleanup_incomplete_attendance():
                 database.add_admin_notification(titulo, mensaje, datos_json)
                 
                 print(f"[{datetime.now()}] Se eliminaron {len(deleted_records)} registros incompletos")
+            
+            # 2. Limpiar registros cerrados anormales (más de 8 horas)
+            abnormal_records = database.auto_delete_abnormal_closed_attendance()
+            
+            if abnormal_records:
+                # Preparar datos para la notificación de registros anormales
+                usuarios_anormales = []
+                total_horas_falsas = 0
+                for record in abnormal_records:
+                    horas = record[6]  # horas_trabajadas
+                    total_horas_falsas += horas
+                    usuarios_anormales.append({
+                        'nombre': record[4],  # full_name
+                        'username': record[5],  # username
+                        'fecha_entrada': record[1],  # check_in
+                        'fecha_salida': record[2],  # check_out
+                        'horas_trabajadas': round(horas, 1),
+                        'user_id': record[3]  # user_id
+                    })
+                
+                # Crear notificación para el admin sobre registros anormales
+                titulo_anormal = f"Registros anormales eliminados (más de 8 horas)"
+                mensaje_anormal = f"Se eliminaron {len(abnormal_records)} registro(s) con horas anormales. Total de horas falsas: {total_horas_falsas:.1f}"
+                datos_json_anormal = json.dumps(usuarios_anormales)
+                
+                database.add_admin_notification(titulo_anormal, mensaje_anormal, datos_json_anormal)
+                
+                print(f"[{datetime.now()}] Se eliminaron {len(abnormal_records)} registros anormales con {total_horas_falsas:.1f} horas falsas")
             
         except Exception as e:
             print(f"Error en cleanup_incomplete_attendance: {e}")

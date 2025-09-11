@@ -638,3 +638,31 @@ def auto_delete_incomplete_attendance():
     conn.close()
     
     return deleted_records
+def auto_delete_abnormal_closed_attendance():
+    """Elimina registros cerrados con más de 8 horas (registros anormales)"""
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    
+    # Buscar registros cerrados con más de 8 horas
+    c.execute("""
+        SELECT a.id, a.check_in, a.check_out, u.id as user_id, u.full_name, u.username,
+               (julianday(a.check_out) - julianday(a.check_in)) * 24 as horas_trabajadas
+        FROM attendance a
+        JOIN users u ON a.user_id = u.id
+        WHERE a.check_out IS NOT NULL
+        AND (julianday(a.check_out) - julianday(a.check_in)) * 24 > 8
+    """)
+    
+    abnormal_records = c.fetchall()
+    
+    if abnormal_records:
+        # Eliminar los registros anormales
+        record_ids = [record[0] for record in abnormal_records]
+        placeholders = ','.join('?' for _ in record_ids)
+        c.execute(f"DELETE FROM attendance WHERE id IN ({placeholders})", record_ids)
+        
+        conn.commit()
+    
+    conn.close()
+    
+    return abnormal_records
