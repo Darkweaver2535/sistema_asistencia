@@ -114,6 +114,18 @@ def init_db():
     )
     ''')
 
+    # Tabla de notificaciones del admin
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS admin_notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        mensaje TEXT NOT NULL,
+        datos_json TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        mostrado INTEGER DEFAULT 0
+    )
+    ''')
+
     # Crear usuario admin si no existe
     c.execute("SELECT * FROM users WHERE username = 'admin'")
     if not c.fetchone():
@@ -530,3 +542,99 @@ def set_user_notification(user_id, mensaje):
     c.execute("UPDATE users SET notificacion = ? WHERE id = ?", (mensaje, user_id))
     conn.commit()
     conn.close()
+
+def auto_delete_incomplete_attendance():
+    """Elimina registros de asistencia incompletos después de 8 horas"""
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    
+    # Buscar registros sin checkout de más de 8 horas
+    eight_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=8)
+    
+    # Obtener información de los registros que se van a eliminar (para notificar al admin)
+    c.execute("""
+        SELECT a.id, a.check_in, u.id as user_id, u.full_name, u.username
+        FROM attendance a
+        JOIN users u ON a.user_id = u.id
+        WHERE a.check_out IS NULL 
+        AND a.check_in < ?
+    """, (eight_hours_ago,))
+    
+    deleted_records = c.fetchall()
+    
+    # Eliminar los registros
+    c.execute("""
+        DELETE FROM attendance 
+        WHERE check_out IS NULL 
+        AND check_in < ?
+    """, (eight_hours_ago,))
+    
+    conn.commit()
+    conn.close()
+    
+    return deleted_records
+
+def get_admin_notifications():
+    """Obtiene notificaciones pendientes para mostrar al admin"""
+    conn = sqlite3.connect('attendance.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    
+    c.execute("SELECT * FROM admin_notifications WHERE mostrado = 0 ORDER BY created_at DESC")
+    notifications = c.fetchall()
+    
+    conn.close()
+    return notifications
+
+def mark_admin_notification_read(notification_id):
+    """Marca una notificación del admin como leída"""
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    
+    c.execute("UPDATE admin_notifications SET mostrado = 1 WHERE id = ?", (notification_id,))
+    conn.commit()
+    conn.close()
+
+def add_admin_notification(titulo, mensaje, datos_json=None):
+    """Agrega una notificación para el admin"""
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    
+    c.execute("""
+        INSERT INTO admin_notifications (titulo, mensaje, datos_json, created_at, mostrado)
+        VALUES (?, ?, ?, ?, 0)
+    """, (titulo, mensaje, datos_json, datetime.datetime.now()))
+    
+    conn.commit()
+    conn.close()
+
+def auto_delete_incomplete_attendance():
+    """Elimina registros de asistencia incompletos después de 8 horas"""
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    
+    # Buscar registros sin checkout de más de 8 horas
+    eight_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=8)
+    
+    # Obtener información de los registros que se van a eliminar (para notificar al admin)
+    c.execute("""
+        SELECT a.id, a.check_in, u.id as user_id, u.full_name, u.username
+        FROM attendance a
+        JOIN users u ON a.user_id = u.id
+        WHERE a.check_out IS NULL 
+        AND a.check_in < ?
+    """, (eight_hours_ago,))
+    
+    deleted_records = c.fetchall()
+    
+    # Eliminar los registros
+    c.execute("""
+        DELETE FROM attendance 
+        WHERE check_out IS NULL 
+        AND check_in < ?
+    """, (eight_hours_ago,))
+    
+    conn.commit()
+    conn.close()
+    
+    return deleted_records

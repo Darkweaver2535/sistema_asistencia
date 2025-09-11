@@ -19,6 +19,7 @@
                             <div class="card bg-warning mb-3">
                                 <div class="card-body">
                                     <h5><i class="bi bi-exclamation-triangle"></i> Tienes una entrada pendiente de marcar salida</h5>
+                                    <p class="mb-0 text-danger"><strong>⚠️ IMPORTANTE:</strong> Si no marcas salida en 8 horas, tu registro será eliminado automáticamente.</p>
                                 </div>
                             </div>
                             <form method="post" action="/check_out" class="mb-4">
@@ -45,6 +46,11 @@
         </div>
     </div>
 </div>
+
+<!-- Modal flotante para notificaciones del admin -->
+{% if session.is_admin %}
+<div id="adminNotificationsContainer"></div>
+{% endif %}
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% for category, message in messages %}
@@ -108,8 +114,119 @@ document.body.style.overflow = 'hidden';
 
     // Actualizar la hora cada segundo
     setInterval(updateTime, 1000);
-    
-    // Actualizar la hora al cargar la página
     updateTime();
+
+    // Verificar notificaciones del admin cada 30 segundos
+    {% if session.is_admin %}
+    function checkAdminNotifications() {
+        fetch('/admin/notifications')
+            .then(response => response.json())
+            .then(data => {
+                if (data.notifications && data.notifications.length > 0) {
+                    showAdminNotifications(data.notifications);
+                }
+            })
+            .catch(error => console.error('Error checking notifications:', error));
+    }
+
+    function showAdminNotifications(notifications) {
+        const container = document.getElementById('adminNotificationsContainer');
+        
+        notifications.forEach(notification => {
+            // Verificar si ya se mostró esta notificación
+            if (document.getElementById(`notification-${notification.id}`)) {
+                return;
+            }
+
+            const modalHtml = `
+                <div class="modal fade show" id="notification-${notification.id}" tabindex="-1" 
+                     style="display: block; background: rgba(0,0,0,0.7); z-index: 9999;">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content border-warning">
+                            <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-exclamation-triangle"></i> ${notification.titulo}
+                                </h5>
+                                <button type="button" class="btn-close" onclick="closeNotification(${notification.id})"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger">
+                                    <h6><i class="bi bi-clock-history"></i> ${notification.mensaje}</h6>
+                                </div>
+                                
+                                ${notification.usuarios.length > 0 ? `
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Usuario</th>
+                                                <th>Nombre</th>
+                                                <th>Fecha/Hora Entrada</th>
+                                                <th>Tiempo Transcurrido</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${notification.usuarios.map(usuario => {
+                                                const entryTime = new Date(usuario.fecha_entrada);
+                                                const now = new Date();
+                                                const hoursElapsed = ((now - entryTime) / (1000 * 60 * 60)).toFixed(1);
+                                                return `
+                                                    <tr>
+                                                        <td><strong>${usuario.username}</strong></td>
+                                                        <td>${usuario.nombre}</td>
+                                                        <td>${entryTime.toLocaleString('es-ES')}</td>
+                                                        <td><span class="badge bg-danger">${hoursElapsed} horas</span></td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                                
+                                <div class="mt-3 p-3 bg-light rounded">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> 
+                                        Los registros se eliminan automáticamente después de 8 horas sin marcar salida 
+                                        para mantener la precisión del sistema de asistencia.
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="closeNotification(${notification.id})">
+                                    <i class="bi bi-check"></i> Entendido
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', modalHtml);
+            document.body.classList.add('modal-open');
+        });
+    }
+
+    function closeNotification(notificationId) {
+        const modal = document.getElementById(`notification-${notificationId}`);
+        if (modal) {
+            modal.remove();
+            // Verificar si no hay más modales abiertos
+            if (!document.querySelector('.modal.show')) {
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Marcar como leída en el servidor
+        fetch(`/admin/notifications/${notificationId}/read`, {
+            method: 'POST'
+        });
+    }
+
+    // Verificar notificaciones al cargar la página y cada 30 segundos
+    checkAdminNotifications();
+    setInterval(checkAdminNotifications, 30000);
+    {% endif %}
 </script>
 {% endblock %}

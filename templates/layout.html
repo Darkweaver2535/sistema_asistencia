@@ -75,6 +75,30 @@
             margin-top: 0.1rem;
             letter-spacing: 0.01em;
         }
+        /* Estilos para notificaciones flotantes del admin */
+        .modal.show {
+            animation: slideInDown 0.3s ease-out;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-content.border-warning {
+            border: 2px solid #ffc107;
+            box-shadow: 0 8px 32px rgba(255, 193, 7, 0.3);
+        }
+        
+        .alert-danger {
+            border-left: 4px solid #dc3545;
+        }
         @media (max-width: 991px) {
             .navbar {
                 border-radius: 0 0 1rem 1rem;

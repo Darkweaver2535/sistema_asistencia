@@ -3,7 +3,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 import database
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
+import json
+import threading
+import time
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -492,6 +495,79 @@ def inject_pendientes_count():
         pendientes = sum(1 for s in solicitudes if s['estado'] == 'pendiente')
         return dict(num_pendientes=pendientes)
     return dict(num_pendientes=0)
+
+def cleanup_incomplete_attendance():
+    """Función que se ejecuta periódicamente para limpiar asistencias incompletas"""
+    while True:
+        try:
+            deleted_records = database.auto_delete_incomplete_attendance()
+            
+            if deleted_records:
+                # Preparar datos para la notificación
+                usuarios_eliminados = []
+                for record in deleted_records:
+                    usuarios_eliminados.append({
+                        'nombre': record[3],  # full_name
+                        'username': record[4],  # username
+                        'fecha_entrada': record[1],  # check_in
+                        'user_id': record[2]  # user_id
+                    })
+                
+                # Crear notificación para el admin
+                titulo = f"Registros eliminados por no marcar salida"
+                mensaje = f"Se eliminaron {len(deleted_records)} registro(s) de asistencia por no marcar salida después de 8 horas"
+                datos_json = json.dumps(usuarios_eliminados)
+                
+                database.add_admin_notification(titulo, mensaje, datos_json)
+                
+                print(f"[{datetime.now()}] Se eliminaron {len(deleted_records)} registros incompletos")
+            
+        except Exception as e:
+            print(f"Error en cleanup_incomplete_attendance: {e}")
+        
+        # Esperar 10 segundos para testing (cambiar a 1800 en producción)
+        time.sleep(1800)
+
+# Iniciar hilo de limpieza automática
+cleanup_thread = threading.Thread(target=cleanup_incomplete_attendance, daemon=True)
+cleanup_thread.start()
+
+@app.route('/admin/notifications')
+def admin_notifications():
+    """Obtiene notificaciones pendientes para el admin"""
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'notifications': []})
+    
+    notifications = database.get_admin_notifications()
+    notifications_data = []
+    
+    for notif in notifications:
+        notif_data = {
+            'id': notif['id'],
+            'titulo': notif['titulo'],
+            'mensaje': notif['mensaje'],
+            'created_at': notif['created_at'],
+            'usuarios': []
+        }
+        
+        if notif['datos_json']:
+            try:
+                notif_data['usuarios'] = json.loads(notif['datos_json'])
+            except:
+                pass
+        
+        notifications_data.append(notif_data)
+    
+    return jsonify({'notifications': notifications_data})
+
+@app.route('/admin/notifications/<int:notification_id>/read', methods=['POST'])
+def mark_notification_read(notification_id):
+    """Marca una notificación como leída"""
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'success': False})
+    
+    database.mark_admin_notification_read(notification_id)
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
