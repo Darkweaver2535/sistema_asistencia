@@ -128,3 +128,10 @@ Para cualquier consulta sobre la implementación o funcionamiento del sistema, c
 **Desarrollador:** Alvaro Encinas  
 **Institución:** Escuela Militar de Ingeniería  
 **Laboratorio:** Metal Mecánica (DNICYT) - Alto Irpavi
+
+cambiar solo:
+app.py
+database.py
+dashboard.html
+layout.html
+para modificar y actualizar con los cambios NO TOCAR DATABASE.
