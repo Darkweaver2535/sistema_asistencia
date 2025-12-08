@@ -543,37 +543,6 @@ def set_user_notification(user_id, mensaje):
     conn.commit()
     conn.close()
 
-def auto_delete_incomplete_attendance():
-    """Elimina registros de asistencia incompletos después de 8 horas"""
-    conn = sqlite3.connect('attendance.db')
-    c = conn.cursor()
-    
-    # Buscar registros sin checkout de más de 8 horas
-    eight_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=8)
-    
-    # Obtener información de los registros que se van a eliminar (para notificar al admin)
-    c.execute("""
-        SELECT a.id, a.check_in, u.id as user_id, u.full_name, u.username
-        FROM attendance a
-        JOIN users u ON a.user_id = u.id
-        WHERE a.check_out IS NULL 
-        AND a.check_in < ?
-    """, (eight_hours_ago,))
-    
-    deleted_records = c.fetchall()
-    
-    # Eliminar los registros
-    c.execute("""
-        DELETE FROM attendance 
-        WHERE check_out IS NULL 
-        AND check_in < ?
-    """, (eight_hours_ago,))
-    
-    conn.commit()
-    conn.close()
-    
-    return deleted_records
-
 def get_admin_notifications():
     """Obtiene notificaciones pendientes para mostrar al admin"""
     conn = sqlite3.connect('attendance.db')
@@ -609,12 +578,12 @@ def add_admin_notification(titulo, mensaje, datos_json=None):
     conn.close()
 
 def auto_delete_incomplete_attendance():
-    """Elimina registros de asistencia incompletos después de 8 horas"""
+    """Elimina registros de asistencia incompletos después de 10 horas"""
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     
-    # Buscar registros sin checkout de más de 8 horas
-    eight_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=8)
+    # Buscar registros sin checkout de más de 10 horas
+    ten_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=10)
     
     # Obtener información de los registros que se van a eliminar (para notificar al admin)
     c.execute("""
@@ -623,7 +592,7 @@ def auto_delete_incomplete_attendance():
         JOIN users u ON a.user_id = u.id
         WHERE a.check_out IS NULL 
         AND a.check_in < ?
-    """, (eight_hours_ago,))
+    """, (ten_hours_ago,))
     
     deleted_records = c.fetchall()
     
@@ -632,25 +601,25 @@ def auto_delete_incomplete_attendance():
         DELETE FROM attendance 
         WHERE check_out IS NULL 
         AND check_in < ?
-    """, (eight_hours_ago,))
+    """, (ten_hours_ago,))
     
     conn.commit()
     conn.close()
     
     return deleted_records
 def auto_delete_abnormal_closed_attendance():
-    """Elimina registros cerrados con más de 8 horas (registros anormales)"""
+    """Elimina registros cerrados con más de 10 horas (registros anormales)"""
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     
-    # Buscar registros cerrados con más de 8 horas
+    # Buscar registros cerrados con más de 10 horas
     c.execute("""
         SELECT a.id, a.check_in, a.check_out, u.id as user_id, u.full_name, u.username,
                (julianday(a.check_out) - julianday(a.check_in)) * 24 as horas_trabajadas
         FROM attendance a
         JOIN users u ON a.user_id = u.id
         WHERE a.check_out IS NOT NULL
-        AND (julianday(a.check_out) - julianday(a.check_in)) * 24 > 8
+        AND (julianday(a.check_out) - julianday(a.check_in)) * 24 > 10
     """)
     
     abnormal_records = c.fetchall()
