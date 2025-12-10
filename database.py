@@ -578,12 +578,12 @@ def add_admin_notification(titulo, mensaje, datos_json=None):
     conn.close()
 
 def auto_delete_incomplete_attendance():
-    """Elimina registros de asistencia incompletos después de 10 horas"""
+    """Elimina registros de asistencia incompletos después de 12 horas"""
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     
-    # Buscar registros sin checkout de más de 10 horas
-    ten_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=10)
+    # Buscar registros sin checkout de más de 12 horas
+    twelve_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=12)
     
     # Obtener información de los registros que se van a eliminar (para notificar al admin)
     c.execute("""
@@ -592,7 +592,7 @@ def auto_delete_incomplete_attendance():
         JOIN users u ON a.user_id = u.id
         WHERE a.check_out IS NULL 
         AND a.check_in < ?
-    """, (ten_hours_ago,))
+    """, (twelve_hours_ago,))
     
     deleted_records = c.fetchall()
     
@@ -601,25 +601,25 @@ def auto_delete_incomplete_attendance():
         DELETE FROM attendance 
         WHERE check_out IS NULL 
         AND check_in < ?
-    """, (ten_hours_ago,))
+    """, (twelve_hours_ago,))
     
     conn.commit()
     conn.close()
     
     return deleted_records
 def auto_delete_abnormal_closed_attendance():
-    """Elimina registros cerrados con más de 10 horas (registros anormales)"""
+    """Elimina registros cerrados con más de 12 horas (registros anormales)"""
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     
-    # Buscar registros cerrados con más de 10 horas
+    # Buscar registros cerrados con más de 12 horas
     c.execute("""
         SELECT a.id, a.check_in, a.check_out, u.id as user_id, u.full_name, u.username,
                (julianday(a.check_out) - julianday(a.check_in)) * 24 as horas_trabajadas
         FROM attendance a
         JOIN users u ON a.user_id = u.id
         WHERE a.check_out IS NOT NULL
-        AND (julianday(a.check_out) - julianday(a.check_in)) * 24 > 10
+        AND (julianday(a.check_out) - julianday(a.check_in)) * 24 > 12
     """)
     
     abnormal_records = c.fetchall()

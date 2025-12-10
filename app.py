@@ -516,7 +516,7 @@ def cleanup_incomplete_attendance():
                 
                 # Crear notificación para el admin
                 titulo = f"Registros eliminados por no marcar salida"
-                mensaje = f"Se eliminaron {len(deleted_records)} registro(s) de asistencia por no marcar salida después de 10 horas"
+                mensaje = f"Se eliminaron {len(deleted_records)} registro(s) de asistencia por no marcar salida después de 12 horas"
                 datos_json = json.dumps(usuarios_eliminados)
                 
                 database.add_admin_notification(titulo, mensaje, datos_json)
@@ -543,7 +543,7 @@ def cleanup_incomplete_attendance():
                     })
                 
                 # Crear notificación para el admin sobre registros anormales
-                titulo_anormal = f"Registros anormales eliminados (más de 10 horas)"
+                titulo_anormal = f"Registros anormales eliminados (más de 12 horas)"
                 mensaje_anormal = f"Se eliminaron {len(abnormal_records)} registro(s) con horas anormales. Total de horas falsas: {total_horas_falsas:.1f}"
                 datos_json_anormal = json.dumps(usuarios_anormales)
                 
